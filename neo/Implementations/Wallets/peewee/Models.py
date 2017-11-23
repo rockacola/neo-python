@@ -2,9 +2,11 @@
 from peewee import *
 from .PWDatabase import PWDatabase
 
+
 class ModelBase(Model):
     class Meta:
         database = PWDatabase.DBProxy()
+
 
 class Account(ModelBase):
     Id = PrimaryKeyField()
@@ -15,6 +17,8 @@ class Account(ModelBase):
 class Address(ModelBase):
     Id = PrimaryKeyField()
     ScriptHash = CharField(unique=True)
+    IsWatchOnly = BooleanField(default=False)
+
 
 class Coin(ModelBase):
     Id = PrimaryKeyField()
@@ -35,10 +39,19 @@ class Contract(ModelBase):
     Account = ForeignKeyField(Account, null=True)
     Address = ForeignKeyField(Address)
 
+
 class Key(ModelBase):
     Id = PrimaryKeyField()
-    Name = CharField(unique=True, )
+    Name = CharField(unique=True)
     Value = CharField()
+
+
+class NEP5Token(ModelBase):
+    ContractHash = CharField(unique=True)
+    Name = CharField()
+    Symbol = CharField()
+    Decimals = IntegerField()
+
 
 class Transaction(ModelBase):
     Id = PrimaryKeyField()
@@ -48,10 +61,9 @@ class Transaction(ModelBase):
     Height = IntegerField()
     DateTime = DateTimeField()
 
+
 class TransactionInfo(ModelBase):
     Id = PrimaryKeyField()
     CoreTransaction = ForeignKeyField(Transaction)
     Height = IntegerField()
     DateTime = DateTimeField()
-
-

@@ -1,28 +1,27 @@
-# -*- coding:utf-8 -*-
 """
 Description:
     Binary Reader
 Usage:
     from neo.IO.BinaryReader import BinaryReader
 """
-
-
+import sys
 import struct
 import binascii
 import importlib
-from autologging import logged
+
+from logzero import logger
+
 from neo.Fixed8 import Fixed8
 from neo.UInt160 import UInt160
 from neo.UInt256 import UInt256
-import sys
 
-@logged
+
 class BinaryReader(object):
     """docstring for BinaryReader"""
+
     def __init__(self, stream):
         super(BinaryReader, self).__init__()
         self.stream = stream
-
 
     def unpack(self, fmt, length=1):
         return struct.unpack(fmt, self.stream.read(length))[0]
@@ -33,7 +32,7 @@ class BinaryReader(object):
                 return ord(self.stream.read(1))
             return self.stream.read(1)
         except Exception as e:
-            self.__log.debug("ord expected character but got none")
+            logger.error("ord expected character but got none")
         return 0
 
     def ReadBytes(self, length):
@@ -58,7 +57,6 @@ class BinaryReader(object):
     def ReadUInt8(self, endian="<"):
         return self.unpack('%sB' % endian)
 
-
     def ReadInt16(self, endian="<"):
         return self.unpack('%sh' % endian, 2)
 
@@ -77,10 +75,10 @@ class BinaryReader(object):
     def ReadUInt64(self, endian="<"):
         return self.unpack('%sQ' % endian, 8)
 
-
     def ReadVarInt(self, max=sys.maxsize):
         fb = self.ReadByte()
-        if fb is None: return 0
+        if fb is None:
+            return 0
         value = 0
         if hex(fb) == '0xfd':
             value = self.ReadUInt16()
@@ -111,22 +109,22 @@ class BinaryReader(object):
     def ReadFixedString(self, length):
         return self.ReadBytes(length).rstrip(b'\x00')
 
-    def ReadSerializableArray(self, class_name, max=sys.maxsize ):
+    def ReadSerializableArray(self, class_name, max=sys.maxsize):
 
         module = '.'.join(class_name.split('.')[:-1])
         klassname = class_name.split('.')[-1]
         klass = getattr(importlib.import_module(module), klassname)
         length = self.ReadVarInt(max=max)
         items = []
-#        print("READING ITEM %s %s " % (length, class_name))
+#        logger.info("READING ITEM %s %s " % (length, class_name))
         try:
             for i in range(0, length):
                 item = klass()
                 item.Deserialize(self)
-#                print("deserialized item %s %s " % ( i, item))
+#                logger.info("deserialized item %s %s " % ( i, item))
                 items.append(item)
         except Exception as e:
-            print("Coludnt deserialize %s " % e)
+            logger.error("Couldn't deserialize %s " % e)
 
         return items
 
@@ -135,9 +133,7 @@ class BinaryReader(object):
 
     def ReadUInt160(self):
 
-        return UInt160(data = bytearray(self.ReadBytes(20)))
-
-
+        return UInt160(data=bytearray(self.ReadBytes(20)))
 
     def Read2000256List(self):
         items = []
@@ -145,7 +141,7 @@ class BinaryReader(object):
             data = self.ReadBytes(64)
             ba = bytearray(binascii.unhexlify(data))
             ba.reverse()
-            items.append( ba.hex().encode('utf-8'))
+            items.append(ba.hex().encode('utf-8'))
         return items
 
     def ReadHashes(self, maximum=16):
@@ -154,16 +150,11 @@ class BinaryReader(object):
         for i in range(0, len):
             ba = bytearray(self.ReadBytes(32))
             ba.reverse()
-            items.append( ba.hex())
+            items.append(ba.hex())
         return items
 
     def ReadFixed8(self, unsigned=False):
 
-        fval=None
+        fval = self.ReadInt64()
 
-        if unsigned:
-            fval = self.ReadUInt64()
-        else:
-            fval = self.ReadInt64()
-
-        return Fixed8( fval )
+        return Fixed8(fval)

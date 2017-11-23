@@ -6,7 +6,7 @@ Description:
 Usage:
     from neo.SmartContract.Contract import Contract
 """
-from io import BytesIO,BufferedReader,BufferedWriter
+from io import BytesIO, BufferedReader, BufferedWriter
 from neo.VM.OpCode import *
 from neo.VM.ScriptBuilder import ScriptBuilder
 from neo.Cryptography.Crypto import *
@@ -15,7 +15,7 @@ from neo.SmartContract.ContractParameterType import ContractParameterType
 from neo.Core.VerificationCode import VerificationCode
 from neo.Core.Helper import Helper
 from neo.Cryptography.Helper import *
-from autologging import logged
+from neo.Cryptography.ECCurve import ECDSA
 
 
 class ContractType():
@@ -23,14 +23,13 @@ class ContractType():
     MultiSigContract = 1
     CustomContract = 2
 
-@logged
+
 class Contract(SerializableMixin, VerificationCode):
     """docstring for Contract"""
 
     PublicKeyHash = None
 
     _address = None
-
 
     @property
     def Address(self):
@@ -51,13 +50,24 @@ class Contract(SerializableMixin, VerificationCode):
         return True
 
     @property
+    def IsMultiSigContract(self):
+        scp = binascii.unhexlify(self.Script)
+
+        if len(scp) < 37:
+            return False
+
+        if scp[len(scp) - 1] != int.from_bytes(CHECKMULTISIG, 'little'):
+            return False
+
+        return True
+
+    @property
     def Type(self):
         if self.IsStandard:
             return ContractType.SignatureContract
-        elif self.IsMultiSigContract():
+        elif self.IsMultiSigContract:
             return ContractType.MultiSigContract
         return ContractType.CustomContract
-
 
     def __init__(self, redeem_script=None, param_list=None, pubkey_hash=None):
         super(Contract, self).__init__()
@@ -71,12 +81,6 @@ class Contract(SerializableMixin, VerificationCode):
     def Create(redeemScript, parameterList, publicKeyHash):
 
         return Contract(redeemScript, parameterList, publicKeyHash)
-
-
-
-    @staticmethod
-    def CreateMultiSigContract(publickKeyHash, m, publicKeys):
-        raise NotImplementedError()
 
     @staticmethod
     def CreateMultiSigRedeemScript(m, publicKeys):
@@ -100,15 +104,30 @@ class Contract(SerializableMixin, VerificationCode):
         return sb.ToArray()
 
     @staticmethod
-    def CreateSignatureContract(publicKey):
+    def CreateMultiSigContract(publicKeyHash, m, publicKeys):
 
+        pk = [ECDSA.decode_secp256r1(p).G for p in publicKeys]
+        return Contract(Contract.CreateMultiSigRedeemScript(m, pk),
+                        bytearray([ContractParameterType.Signature] * 3),
+                        publicKeyHash)
+
+    @staticmethod
+    def CreateSignatureContract(publicKey):
+        """
+        Create a signature contract.
+
+        Args:
+            publicKey (edcsa.Curve.point): i.e. KeyPair.PublicKey.
+
+        Returns:
+            neo.SmartContract.Contract: a Contract instance.
+        """
         script = Contract.CreateSignatureRedeemScript(publicKey)
         params = bytearray([ContractParameterType.Signature])
         encoded = publicKey.encode_point(True)
-        pubkey_hash = Crypto.ToScriptHash( encoded, unhex=True)
+        pubkey_hash = Crypto.ToScriptHash(encoded, unhex=True)
 
         return Contract(script, params, pubkey_hash)
-
 
     @staticmethod
     def CreateSignatureRedeemScript(publicKey):
@@ -124,11 +143,8 @@ class Contract(SerializableMixin, VerificationCode):
             return False
         return self.ScriptHash == other.ScriptHash
 
-
-
     def ToScriptHash(self):
         return Crypto.Hash160(self.ScriptHash)
-
 
     def Deserialize(self, reader):
         self.PublicKeyHash = reader.ReadUInt160()
@@ -137,25 +153,18 @@ class Contract(SerializableMixin, VerificationCode):
         script = bytearray(reader.ReadVarBytes()).hex()
         self.Script = script.encode('utf-8')
 
-
     def Serialize(self, writer):
         writer.WriteUInt160(self.PublicKeyHash)
         writer.WriteVarBytes(self.ParameterList)
         writer.WriteVarBytes(self.Script)
 
-    def IsMultiSigContract(self):
-        #Not implemented
-        return False
-
-
     @staticmethod
     def PubkeyToRedeem(pubkey):
-        return binascii.unhexlify('21'+ pubkey) + from_int_to_byte(int('ac',16))
+        return binascii.unhexlify('21' + pubkey) + from_int_to_byte(int('ac', 16))
 
     @staticmethod
     def RedeemToScripthash(redeem):
         return binascii.hexlify(bin_hash160(redeem))
-
 
     def ToArray(self):
         return Helper.ToArray(self)

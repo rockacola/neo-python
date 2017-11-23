@@ -1,13 +1,14 @@
+import sys
+import traceback
+import pdb
+
+from logzero import logger
 
 from neo.VM.Mixins import EquatableMixin
 from neo.BigInteger import BigInteger
-import sys
-import traceback
-from autologging import logged
-import pdb
-@logged
-class StackItem(EquatableMixin):
 
+
+class StackItem(EquatableMixin):
 
     @property
     def IsArray(self):
@@ -21,19 +22,19 @@ class StackItem(EquatableMixin):
         return bytearray()
 
     def GetBigInteger(self):
-        return BigInteger(int.from_bytes(self.GetByteArray(),'little',signed=True))
+        return BigInteger(int.from_bytes(self.GetByteArray(), 'little', signed=True))
 
     def GetBoolean(self):
         for p in self.GetByteArray():
-            if p > 0: return True
+            if p > 0:
+                return True
         return False
 
     def GetArray(self):
+        logger.info("trying to get array:: %s " % self)
         raise Exception('Not supported')
 
-    def GetInterface(self, t):
-        self.__log.debug("You may need to push %s  using FromInterface " % t)
-#        raise Exception('Not Supported')
+    def GetInterface(self):
         return None
 
     def GetString(self):
@@ -46,8 +47,6 @@ class StackItem(EquatableMixin):
     def FromInterface(value):
         return InteropInterface(value)
 
-
-
     @staticmethod
     def New(value):
         typ = type(value)
@@ -55,7 +54,9 @@ class StackItem(EquatableMixin):
         if typ is BigInteger:
             return Integer(value)
         elif typ is int:
-            return Integer( BigInteger(value))
+            return Integer(BigInteger(value))
+        elif typ is float:
+            return Integer(BigInteger(int(value)))
         elif typ is bool:
             return Boolean(value)
         elif typ is bytearray or typ is bytes:
@@ -63,13 +64,13 @@ class StackItem(EquatableMixin):
         elif typ is list:
             return Array(value)
 
-#        print("Could not create stack item for vaule %s %s " % (typ, value))
+#        logger.info("Could not create stack item for vaule %s %s " % (typ, value))
         return value
+
 
 class Array(StackItem):
 
-
-    _array = [] # a list of stack items
+    _array = []  # a list of stack items
 
     @property
     def IsArray(self):
@@ -79,8 +80,10 @@ class Array(StackItem):
         self._array = value
 
     def Equals(self, other):
-        if other is None: return False
-        if other is self: return True
+        if other is None:
+            return False
+        if other is self:
+            return True
 
         if type(other) is not Array:
             return False
@@ -91,15 +94,16 @@ class Array(StackItem):
         return self._array
 
     def GetBigInteger(self):
+        logger.info("Trying to get big integer %s " % self)
         raise Exception("Not Supported")
 
     def GetBoolean(self):
         return len(self._array) > 0
 
     def GetByteArray(self):
+        logger.info("Trying to get bytearray integer %s " % self)
+
         raise Exception("Not supported")
-
-
 
     def __str__(self):
         return "Array: %s" % [str(item) for item in self._array]
@@ -116,14 +120,15 @@ class Boolean(StackItem):
         self._value = value
 
     def Equals(self, other):
-        if other is None: return False
-        if other is self: return True
+        if other is None:
+            return False
+        if other is self:
+            return True
 
         if type(other) is not Boolean:
             return self.GetByteArray() == other.GetByteArray()
 
         return self._value == other._value
-
 
     def GetBigInteger(self):
         return 1 if self._value else 0
@@ -140,15 +145,16 @@ class Boolean(StackItem):
 
 class ByteArray(StackItem):
 
-
     _value = None
 
     def __init__(self, value):
         self._value = value
 
     def Equals(self, other):
-        if other is None: return False
-        if other is self: return True
+        if other is None:
+            return False
+        if other is self:
+            return True
 
         return self._value == other._value
 
@@ -170,12 +176,11 @@ class ByteArray(StackItem):
             pass
         return str(self)
 
-
     def __str__(self):
         return "ByteArray: %s" % self._value
 
-class Integer(StackItem):
 
+class Integer(StackItem):
 
     _value = None
 
@@ -185,14 +190,15 @@ class Integer(StackItem):
         self._value = value
 
     def Equals(self, other):
-        if other is None: return False
-        if other is self: return True
+        if other is None:
+            return False
+        if other is self:
+            return True
 
         if type(other) is not Integer:
             return self.GetByteArray() == other.GetByteArray()
 
         return self._value == other._value
-
 
     def GetBigInteger(self):
         return self._value
@@ -206,6 +212,7 @@ class Integer(StackItem):
     def __str__(self):
         return "Integer: %s " % self._value
 
+
 class InteropInterface(StackItem):
 
     _object = None
@@ -214,8 +221,10 @@ class InteropInterface(StackItem):
         self._object = value
 
     def Equals(self, other):
-        if other is None: return False
-        if other is self: return True
+        if other is None:
+            return False
+        if other is self:
+            return True
 
         if type(other) is not InteropInterface:
             return False
@@ -226,12 +235,9 @@ class InteropInterface(StackItem):
         return True if self._object is not None else False
 
     def GetByteArray(self):
-        frame = sys._getframe(2)
-        traceback.print_stack(frame)
-#        print("calling frame %s " % sys._getframe(2))
         raise Exception("Not supported- Cant get byte array for item %s %s " % (type(self), self._object))
 
-    def GetInterface(self, t):
+    def GetInterface(self):
         return self._object
 
     def __str__(self):
@@ -240,6 +246,7 @@ class InteropInterface(StackItem):
         except Exception as e:
             pass
         return "IOp Interface Item"
+
 
 class Struct(Array):
 
@@ -251,10 +258,13 @@ class Struct(Array):
         super(Struct, self).__init__(value)
 
     def Clone(self):
-        newArray = []
+        length = len(self._array)
+        newArray = [None for i in range(0, length)]
 
-        for i in range(0, len(self._array)):
-            if self._array[i].IsStruct:
+        for i in range(0, length):
+            if self._array[i] is None:
+                newArray[i] = None
+            elif self._array[i].IsStruct:
                 newArray[i] = self._array[i].Clone()
             else:
                 newArray[i] = self._array[i]
@@ -262,8 +272,10 @@ class Struct(Array):
         return Struct(newArray)
 
     def Equals(self, other):
-        if other is None: return False
-        if other is self: return True
+        if other is None:
+            return False
+        if other is self:
+            return True
 
         if type(other) is not Struct:
             return False
@@ -273,12 +285,9 @@ class Struct(Array):
         return "Struct: %s " % self._array
 
 
-@logged
 class InteropService():
 
-
     _dictionary = {}
-
 
     def __init__(self):
         self.Register("System.ExecutionEngine.GetScriptContainer", self.GetScriptContainer)
@@ -290,34 +299,73 @@ class InteropService():
         self._dictionary[method] = func
 
     def Invoke(self, method, engine):
-        if not method in self._dictionary.keys():
+        if method not in self._dictionary.keys():
 
-            self.__log.debug("method %s not found in ->" % method)
-            for k,v in self._dictionary.items():
-                self.__log.debug("%s -> %s " % (k, v))
+            logger.info("method %s not found in ->" % method)
+            for k, v in self._dictionary.items():
+                logger.info("%s -> %s " % (k, v))
             return False
 
         func = self._dictionary[method]
-        #print("[InteropService Method] %s " % func)
+        # logger.info("[InteropService Method] %s " % func)
         return func(engine)
 
     @staticmethod
     def GetScriptContainer(engine):
-        engine.EvaluationStack.PushT( StackItem.FromInterface(engine.ScriptContainer))
+        engine.EvaluationStack.PushT(StackItem.FromInterface(engine.ScriptContainer))
         return True
 
     @staticmethod
     def GetExecutingScriptHash(engine):
-        engine.EvaluationStack.PushT( engine.CurrentContext.ScriptHash() )
+        engine.EvaluationStack.PushT(engine.CurrentContext.ScriptHash())
         return True
 
     @staticmethod
     def GetCallingScriptHash(engine):
-        engine.EvaluationStack.PushT( engine.CallingContext.ScriptHash() )
+        engine.EvaluationStack.PushT(engine.CallingContext.ScriptHash())
         return True
 
     @staticmethod
     def GetEntryScriptHash(engine):
 
-        engine.EvaluationStack.PushT( engine.EntryContext.ScriptHash() )
+        engine.EvaluationStack.PushT(engine.EntryContext.ScriptHash())
         return True
+
+
+def stack_item_to_py(stack_item):
+    """
+    Helper to convert a StackItem subclass to the specific Python object.
+    eg. Integer(StackItem) -> int, or ByteArray(StackItem) -> bytes
+
+    Works also with Array(StackItem).
+
+    Args:
+        stack_item (object): the StackItem subclass
+
+    Returns:
+        object: The StackItem subclass converted to it's native Python representation.
+    """
+    if isinstance(stack_item, Array):
+        return [stack_item_to_py(item) for item in stack_item.GetArray()]
+
+    elif isinstance(stack_item, Boolean):
+        return stack_item.GetBoolean()
+
+    elif isinstance(stack_item, ByteArray):
+        return bytes(stack_item.GetByteArray())
+
+    elif isinstance(stack_item, Integer):
+        return stack_item.GetBigInteger()
+
+    elif isinstance(stack_item, ByteArray):
+        return stack_item.GetBigInteger()
+
+    elif isinstance(stack_item, InteropInterface):
+        return stack_item.GetInterface()
+
+    elif isinstance(stack_item, Struct):
+        return stack_item.GetArray()
+    elif stack_item is None:
+        return None
+    else:
+        raise ValueError('Not supported')

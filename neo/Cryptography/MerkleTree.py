@@ -1,13 +1,12 @@
-# -*- coding: UTF-8 -*-
+import sys
+
+from logzero import logger
 
 from neo.Cryptography.Crypto import *
-from bitarray import bitarray
-import sys
-from autologging import logged
 from neo.UInt160 import UInt160
 from neo.UInt256 import UInt256
 
-@logged
+
 class MerkleTreeNode(object):
     Hash = None
     Parent = None
@@ -16,7 +15,6 @@ class MerkleTreeNode(object):
 
     def __init__(self, hash=None):
         self.Hash = hash
-
 
     def IsLeaf(self):
         if not self.LeftChild and not self.RightChild:
@@ -29,7 +27,7 @@ class MerkleTreeNode(object):
     def Size(self):
         return sys.getsizeof(self)
 
-@logged
+
 class MerkleTree(object):
 
     Root = None
@@ -37,8 +35,8 @@ class MerkleTree(object):
     Depth = 0
 
     def __init__(self, hashes):
-        self.Root = MerkleTree.__Build([ MerkleTreeNode(hash) for hash in hashes])
-        depth=1
+        self.Root = MerkleTree.__Build([MerkleTreeNode(hash) for hash in hashes])
+        depth = 1
         i = self.Root
         while i.LeftChild is not None:
             depth = depth + 1
@@ -52,23 +50,21 @@ class MerkleTree(object):
         if len(leaves) == 1:
             return leaves[0]
 
-
         num_parents = int((len(leaves) + 1) / 2)
         parents = [MerkleTreeNode() for i in range(0, num_parents)]
 
         for i in range(0, num_parents):
             node = parents[i]
             node.LeftChild = leaves[i * 2]
-            leaves[i*2].Parent =  node
-            if( i * 2 + 1 == len(leaves)):
+            leaves[i * 2].Parent = node
+            if(i * 2 + 1 == len(leaves)):
                 node.RightChild = node.LeftChild
             else:
                 node.RightChild = leaves[i * 2 + 1]
                 leaves[i * 2 + 1].Parent = node
 
-
-            hasharray= bytearray(node.LeftChild.Hash.ToArray() + node.RightChild.Hash.ToArray())
-            node.Hash = UInt256( data = Crypto.Hash256(hasharray))
+            hasharray = bytearray(node.LeftChild.Hash.ToArray() + node.RightChild.Hash.ToArray())
+            node.Hash = UInt256(data=Crypto.Hash256(hasharray))
 
         return MerkleTree.__Build(parents)
 
@@ -101,16 +97,17 @@ class MerkleTree(object):
         return list(hashes)
 
     def Trim(self, flags):
-        flags = bitarray(flags)
-        len = 1 << len(self.Depth-1)
-        while flags.length() < len:
+        logger.info("Trimming!")
+        flags = bytearray(flags)
+        length = 1 << len(self.Depth - 1)
+        while len(flags) < length:
             flags.append(0)
 
-        MerkleTree.__TrimNode(self.Root, 0, self.Depth, flags )
+        MerkleTree.__TrimNode(self.Root, 0, self.Depth, flags)
 
     @staticmethod
-    def __TrimNode(node, index, depth, flags ):
-        if depth == 1 or node.LeftChild == None:
+    def __TrimNode(node, index, depth, flags):
+        if depth == 1 or node.LeftChild is None:
             return
 
         if depth == 2:
@@ -120,10 +117,9 @@ class MerkleTree(object):
 
         else:
 
-            MerkleTree.__TrimNode(node.LeftChild, index * 2, depth-1, flags)
-            MerkleTree.__TrimNode(node.RightChild, index * 2, depth-1, flags)
+            MerkleTree.__TrimNode(node.LeftChild, index * 2, depth - 1, flags)
+            MerkleTree.__TrimNode(node.RightChild, index * 2, depth - 1, flags)
 
             if node.LeftChild.LeftChild is None and node.RightChild.RightChild is None:
                 node.LeftChild = None
                 node.RightChild = None
-

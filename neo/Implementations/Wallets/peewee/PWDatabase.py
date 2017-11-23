@@ -1,11 +1,9 @@
-
-from peewee import *
-from neo.Defaults import PEEWEE_DB
 import logging
+from peewee import *
+from logzero import logger
 
 logger = logging.getLogger('peewee')
 logger.setLevel(logging.ERROR)
-#logger.addHandler(logging.StreamHandler())
 
 
 class PWDatabase(object):
@@ -19,15 +17,17 @@ class PWDatabase(object):
         return PWDatabase.__proxy
 
     __instance__ = None
-    __dbpath__ = PEEWEE_DB
+    __dbpath__ = 'accounts.db3'
 
     _db = None
 
     def __init__(self):
-        self._db = SqliteDatabase(PWDatabase.__dbpath__)
-        PWDatabase.DBProxy().initialize(self._db)
-        self.startup()
-
+        try:
+            self._db = SqliteDatabase(PWDatabase.__dbpath__)
+            PWDatabase.DBProxy().initialize(self._db)
+            self.startup()
+        except Exception as e:
+            logger.error("database file does not exist, or incorrect permissions")
 
     def close(self):
         self._db.close()
@@ -35,8 +35,6 @@ class PWDatabase(object):
 
     def startup(self):
         self._db.connect()
-
-
 
     @property
     def DB(self):
@@ -57,10 +55,11 @@ class PWDatabase(object):
     def ContextDB():
         return PWDatabase.Context().DB
 
-
-
     @staticmethod
     def Destroy():
         if PWDatabase.__instance__:
-            PWDatabase.__instance__.close()
+            try:
+                PWDatabase.__instance__.close()
+            except Exception as e:
+                pass
         PWDatabase.__instance__ = None

@@ -1,20 +1,34 @@
-from neo.SmartContract.Contract import Contract,ContractType
-from neo.SmartContract.ContractParameterType import ContractParameterType
-from neo.VM.ScriptBuilder import ScriptBuilder
-from neo.VM import OpCode
-from neo.Core.Witness import Witness
 import json
 import binascii
 import pdb
 
-class ContractParamater():
+from logzero import logger
 
+from neo.Core.TX.Transaction import ContractTransaction
+from neo.SmartContract.Contract import Contract, ContractType
+from neo.SmartContract.ContractParameterType import ContractParameterType, ToName
+from neo.VM.ScriptBuilder import ScriptBuilder
+from neo.IO.MemoryStream import MemoryStream
+from neo.IO.BinaryReader import BinaryReader
+from neo.IO.BinaryWriter import BinaryWriter
+from neo.VM import OpCode
+from neo.Core.Witness import Witness
+from neo.Core.FunctionCode import FunctionCode
+
+
+class ContractParamater():
 
     Type = None
     Value = None
 
     def __init__(self, type):
         self.Type = type
+
+    def ToJson(self):
+        jsn = {}
+        jsn['type'] = ToName(self.Type)
+        return jsn
+
 
 class ContextItem():
 
@@ -29,8 +43,28 @@ class ContextItem():
             p = ContractParamater(b)
             self.ContractParameters.append(p)
 
-class ContractParametersContext():
+    def ToJson(self):
+        jsn = {}
+        if self.Script is not None:
+            if type(self.Script) is str:
+                jsn['script'] = self.Script
+            else:
+                jsn['script'] = self.Script.decode()
+        jsn['parameters'] = [p.ToJson() for p in self.ContractParameters]
+        if self.Signatures is not None:
+            jsn['signatures'] = {}
+            for key, value in self.Signatures.items():
+                if value is not None:
+                    if type(value) is str:
+                        jsn['signatures'][key] = value
+                    else:
+                        jsn['signatures'][key] = value.decode()
+                else:
+                    logger.info("Seems like {} has empty signature".format(key))
+        return jsn
 
+
+class ContractParametersContext():
 
     Verifiable = None
 
@@ -38,12 +72,14 @@ class ContractParametersContext():
 
     ContextItems = None
 
-    def __init__(self, verifiable):
+    IsMultiSig = None
+
+    def __init__(self, verifiable, isMultiSig=False):
 
         self.Verifiable = verifiable
         self.ScriptHashes = verifiable.GetScriptHashesForVerifying()
-
         self.ContextItems = {}
+        self.IsMultiSig = isMultiSig
 
     @property
     def Completed(self):
@@ -56,11 +92,25 @@ class ContractParametersContext():
                 return False
 
             for p in item.ContractParameters:
-                if p is None or p.Value is None:
-                    if p.Type is not None:
-                        p.Value = 0
-        return True
 
+                # for multi signature contracts, we need to make sure
+                # that this check runs
+                if self.IsMultiSig:
+                    if p is None or p.Value is None:
+                        return False
+                    if p.Type is not None:
+                        if p.Value == 0:
+                            return False
+
+                # for non-multisig contracts ( specifically, sending from contract
+                # addresses that have more than one param ) we need to allow an empty
+                # value, or, if it is empty, to fill it with 0
+                else:
+                    if p is None or p.Value is None:
+                        if p.Type is not None:
+                            p.Value = 0
+
+        return True
 
     def Add(self, contract, index, parameter):
 
@@ -71,13 +121,12 @@ class ContractParametersContext():
 
         return True
 
-
     def CreateItem(self, contract):
 
         if contract.ScriptHash.ToBytes() in self.ContextItems.keys():
-            return self.ContextItems[ contract.ScriptHash.ToBytes()]
+            return self.ContextItems[contract.ScriptHash.ToBytes()]
 
-        if not contract.ScriptHash in self.ScriptHashes:
+        if contract.ScriptHash not in self.ScriptHashes:
             return None
 
         item = ContextItem(contract)
@@ -86,14 +135,45 @@ class ContractParametersContext():
 
         return item
 
-
-
     def AddSignature(self, contract, pubkey, signature):
 
         if contract.Type == ContractType.MultiSigContract:
 
-            raise NotImplementedError('Multi sig contracts not yet implemented')
+            item = self.CreateItem(contract)
+            if item is None:
+                return False
+            for p in item.ContractParameters:
+                if p.Value is not None:
+                    return False
+            if item.Signatures is None:
+                item.Signatures = {}
+            elif pubkey.encode_point(True) in item.Signatures:
+                return False
 
+            points = []
+            temp = binascii.unhexlify(contract.Script)
+            ms = MemoryStream(binascii.unhexlify(contract.Script))
+            reader = BinaryReader(ms)
+            numr = reader.ReadUInt8()
+            while reader.ReadUInt8() == 33:
+                points.append(binascii.hexlify(reader.ReadBytes(33)))
+            ms.close()
+
+            if pubkey.encode_point(True) not in points:
+                return False
+
+            item.Signatures[pubkey.encode_point(True).decode()] = binascii.hexlify(signature)
+
+            if len(item.Signatures) == len(contract.ParameterList):
+                i = 0
+                points.sort(reverse=True)
+                for k in points:
+                    if k.decode() in item.Signatures:
+                        if self.Add(contract, i, item.Signatures[k.decode()]) is None:
+                            raise Exception("Invalid operation")
+                        i += 1
+                item.Signatures = None
+            return True
 
         else:
 
@@ -102,7 +182,7 @@ class ContractParametersContext():
             for i in range(0, length):
 
                 if contract.ParameterList[i] == ContractParameterType.Signature:
-                    if index >=0:
+                    if index >= 0:
                         raise Exception("Signature must be first")
                     else:
                         index = i
@@ -115,8 +195,6 @@ class ContractParametersContext():
                 return index
         return -1
 
-
-
     def GetParameters(self, script_hash):
         if script_hash.ToBytes() in self.ContextItems.keys():
             return self.ContextItems[script_hash.ToBytes()].Parameters
@@ -126,7 +204,6 @@ class ContractParametersContext():
         if params:
             return params[index]
         return None
-
 
     def GetScripts(self):
 
@@ -146,9 +223,6 @@ class ContractParametersContext():
 
             for p in plist:
 
-#                if p.Value =:
-#                    sb.push(0)
-#                else:
                 sb.push(p.Value)
 
             vscript = bytearray(0)
@@ -157,13 +231,61 @@ class ContractParametersContext():
                 if type(item.Script) is str:
                     item.Script = item.Script.encode('utf-8')
                 vscript = item.Script
+#                logger.info("SCRIPT IS %s " % item.Script)
 
             witness = Witness(
+                #                invocation_script='40fdb984faf0a400b6894c1ce5b317cf894ba3eb89b899cefda2ac307b278418b943534ad298884f9200dc4b7e1dc244db16c62a44a830a860060ec11d3e6e9717',
                 invocation_script=sb.ToArray(),
                 verification_script=vscript
             )
 
             scripts.append(witness)
 
-
         return scripts
+
+    def ToJson(self):
+        jsn = {}
+        jsn['type'] = 'Neo.Core.ContractTransaction'  # Verifiable.GetType().FullName
+        ms = MemoryStream()
+        w = BinaryWriter(ms)
+        self.Verifiable.SerializeUnsigned(w)
+        ms.flush()
+        jsn['hex'] = ms.ToArray().decode()
+        jsn['items'] = {}
+        for key, value in self.ContextItems.items():
+            if type(key) == str:
+                shkey = "0x{}".format(key)
+            else:
+                shkey = "0x{}".format(key.decode())
+            jsn['items'][shkey] = value.ToJson()
+
+        return jsn
+
+    def FromJson(jsn, isMultiSig=True):
+        try:
+            parsed = json.loads(jsn)
+            if parsed['type'] == 'Neo.Core.ContractTransaction':
+                verifiable = ContractTransaction()
+                ms = MemoryStream(binascii.unhexlify(parsed['hex']))
+                r = BinaryReader(ms)
+                verifiable.DeserializeUnsigned(r)
+                context = ContractParametersContext(verifiable, isMultiSig=isMultiSig)
+                for key, value in parsed['items'].items():
+                    if "0x" in key:
+                        key = key[2:]
+                    key = key.encode()
+                    parameterbytes = []
+                    for pt in value['parameters']:
+                        if pt['type'] == 'Signature':
+                            parameterbytes.append(0)
+                    contract = Contract.Create(value['script'], parameterbytes, key)
+                    context.ContextItems[key] = ContextItem(contract)
+                    if 'signatures' in value:
+                        context.ContextItems[key].Signatures = value['signatures']
+
+                return context
+            else:
+                raise ("Unsupported transaction type in JSON")
+
+        except Exception as e:
+            logger.error("Failed to import ContractParametersContext from JSON: {}".format(e))

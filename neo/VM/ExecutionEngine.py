@@ -1,22 +1,24 @@
+import hashlib
+import sys
+import os
+import traceback
+import pdb
+
+from logzero import logger
 
 from neo.VM.RandomAccessStack import RandomAccessStack
 from neo.VM.ExecutionContext import ExecutionContext
 from neo.VM import VMState
 from neo.VM.OpCode import *
-from autologging import logged
 from neo.SmartContract.ContractParameterType import ContractParameterType
 from neo.BigInteger import BigInteger
-import hashlib
-from neo.VM.InteropService import Array,Struct,StackItem
-import sys,os
+from neo.VM.InteropService import Array, Struct, StackItem
 from neo.UInt160 import UInt160
-import traceback
-import pdb
 
-@logged
+
 class ExecutionEngine():
 
-    _Table=None
+    _Table = None
     _Service = None
 
     _ScriptContainer = None
@@ -24,11 +26,11 @@ class ExecutionEngine():
 
     _VMState = VMState.BREAK
 
-
-    _InvocationStack=None
-    _EvaluationStack=None
+    _InvocationStack = None
+    _EvaluationStack = None
     _AltStack = None
 
+    _ExecutedScriptHashes = None
 
     ops_processed = 0
 
@@ -68,10 +70,13 @@ class ExecutionEngine():
 
     @property
     def EntryContext(self):
-        return self.InvocationStack.Peek( self.InvocationStack.Count - 1)
+        return self.InvocationStack.Peek(self.InvocationStack.Count - 1)
 
+    @property
+    def ExecutedScriptHashes(self):
+        return self._ExecutedScriptHashes
 
-    def __init__(self, container=None, crypto=None, table=None, service = None):
+    def __init__(self, container=None, crypto=None, table=None, service=None):
         self._ScriptContainer = container
         self._Crypto = crypto
         self._Table = table
@@ -80,12 +85,11 @@ class ExecutionEngine():
         self._InvocationStack = RandomAccessStack(name='Invocation')
         self._EvaluationStack = RandomAccessStack(name='Evaluation')
         self._AltStack = RandomAccessStack(name='Alt')
-
+        self._ExecutedScriptHashes = []
         self.ops_processed = 0
 
     def AddBreakPoint(self, position):
         self.CurrentContext.Breakpoints.add(position)
-
 
     def ResultsForCode(self, contract):
         try:
@@ -103,26 +107,22 @@ class ExecutionEngine():
             elif return_type == ContractParameterType.Array:
                 return item.GetArray()
             else:
-                print("couldnt format results for return type %s " % return_type)
+                logger.error("couldnt format results for return type %s " % return_type)
             return item
         except Exception as e:
             pass
 
         return self.EvaluationStack.Items
 
-
     def Dispose(self):
         while self._InvocationStack.Count > 0:
             self._InvocationStack.Pop().Dispose()
 
-
     def Execute(self):
         self._VMState &= ~VMState.BREAK
 
-
         while self._VMState & VMState.HALT == 0 and self._VMState & VMState.FAULT == 0 and self._VMState & VMState.BREAK == 0:
             self.StepInto()
-
 
     def ExecuteOp(self, opcode, context):
         estack = self._EvaluationStack
@@ -138,8 +138,8 @@ class ExecutionEngine():
         else:
 
             # push values
-            pushops = [PUSHM1,PUSH1,PUSH2,PUSH3,PUSH4,PUSH5,PUSH6,PUSH7,PUSH8,
-                       PUSH9,PUSH10,PUSH11,PUSH12,PUSH13,PUSH14,PUSH15,PUSH16 ]
+            pushops = [PUSHM1, PUSH1, PUSH2, PUSH3, PUSH4, PUSH5, PUSH6, PUSH7, PUSH8,
+                       PUSH9, PUSH10, PUSH11, PUSH12, PUSH13, PUSH14, PUSH15, PUSH16]
 
             if opcode == PUSH0:
                 estack.PushT(bytearray([0]))
@@ -156,7 +156,7 @@ class ExecutionEngine():
                 topush = int.from_bytes(opcode, 'little') - int.from_bytes(PUSH1, 'little') + 1
                 estack.PushT(topush)
 
-            #control
+            # control
             elif opcode == NOP:
                 pass
             elif opcode in [JMP, JMPIF, JMPIFNOT]:
@@ -173,12 +173,11 @@ class ExecutionEngine():
                     if opcode == JMPIFNOT:
                         fValue = not fValue
                 if fValue:
-                    context.SetInstructionPointer( offset )
-
+                    context.SetInstructionPointer(offset)
 
             elif opcode == CALL:
                 istack.PushT(context.Clone())
-                context.SetInstructionPointer( context.InstructionPointer + 2)
+                context.SetInstructionPointer(context.InstructionPointer + 2)
 
                 self.ExecuteOp(JMP, self.CurrentContext)
 
@@ -188,14 +187,14 @@ class ExecutionEngine():
                     self._VMState |= VMState.HALT
 
             elif opcode == APPCALL or opcode == TAILCALL:
-                if self._Table == None:
+                if self._Table is None:
                     self._VMState |= VMState.FAULT
                     return
 
                 script_hash = UInt160(data=context.OpReader.ReadBytes(20)).ToBytes()
                 script = self._Table.GetScript(script_hash)
 
-                if script == None:
+                if script is None:
                     self._VMState |= VMState.FAULT
                     return
 
@@ -206,10 +205,10 @@ class ExecutionEngine():
 
             elif opcode == SYSCALL:
                 call = context.OpReader.ReadVarBytes(252).decode('ascii')
-                if not self._Service.Invoke( call, self):
+                if not self._Service.Invoke(call, self):
                     self._VMState |= VMState.FAULT
 
-            #stack operations
+            # stack operations
             elif opcode == DUPFROMALTSTACK:
                 item = astack.Peek()
                 estack.PushT(astack.Peek())
@@ -234,13 +233,12 @@ class ExecutionEngine():
                     self._VMState |= VMState.FAULT
                     return
 
-                #if n == 0 break, same as do x if n > 0
+                # if n == 0 break, same as do x if n > 0
                 if n > 0:
 
                     item = estack.Peek(n)
                     estack.Set(n, estack.Peek())
                     estack.Set(0, item)
-
 
             elif opcode == XTUCK:
                 n = estack.Pop().GetBigInteger()
@@ -279,7 +277,7 @@ class ExecutionEngine():
                     self._VMState |= VMState.FAULT
                     return
 
-                estack.PushT( estack.Peek(n))
+                estack.PushT(estack.Peek(n))
 
             elif opcode == ROLL:
 
@@ -289,7 +287,7 @@ class ExecutionEngine():
                     return
 
                 if n > 0:
-                    estack.PushT( estack.Remove(n))
+                    estack.PushT(estack.Remove(n))
 
             elif opcode == ROT:
                 x3 = estack.Pop()
@@ -319,7 +317,7 @@ class ExecutionEngine():
 
                 x2 = estack.Pop().GetByteArray()
                 x1 = estack.Pop().GetByteArray()
-                estack.PushT( x1 + x2 )
+                estack.PushT(x1 + x2)
 
             elif opcode == SUBSTR:
 
@@ -334,7 +332,8 @@ class ExecutionEngine():
                     return
 
                 x = estack.Pop().GetByteArray()
-                estack.PushT( x[index:count+index])
+
+                estack.PushT(x[index:count + index])
 
             elif opcode == LEFT:
 
@@ -375,29 +374,28 @@ class ExecutionEngine():
                 x2 = estack.Pop().GetBigInteger()
                 x1 = estack.Pop().GetBigInteger()
 
-                estack.PushT( x1 & x2)
+                estack.PushT(x1 & x2)
 
             elif opcode == OR:
 
                 x2 = estack.Pop().GetBigInteger()
                 x1 = estack.Pop().GetBigInteger()
 
-                estack.PushT( x1 | x2 )
+                estack.PushT(x1 | x2)
 
             elif opcode == XOR:
 
                 x2 = estack.Pop().GetBigInteger()
                 x1 = estack.Pop().GetBigInteger()
 
-                estack.PushT( x1 ^ x2 )
+                estack.PushT(x1 ^ x2)
 
             elif opcode == EQUAL:
-                x2 = estack.Pop().GetBigInteger()
-                x1 = estack.Pop().GetBigInteger()
-                estack.PushT( x1.Equals(x2))
+                x2 = estack.Pop()
+                x1 = estack.Pop()
+                estack.PushT(x1.Equals(x2))
 
-
-            #numeric
+            # numeric
 
             elif opcode == INC:
 
@@ -411,20 +409,19 @@ class ExecutionEngine():
 
             elif opcode == SIGN:
 
-                ##### Make sure to implement sign for big integer
+                # Make sure to implement sign for big integer
                 x = estack.Pop().GetBigInteger()
                 estack.PushT(x.Sign)
-
 
             elif opcode == NEGATE:
 
                 x = estack.Pop().GetBigInteger()
-                estack.PushT( -x )
+                estack.PushT(-x)
 
             elif opcode == ABS:
 
                 x = estack.Pop().GetBigInteger()
-                estack.PushT( abs(x))
+                estack.PushT(abs(x))
 
             elif opcode == NOT:
 
@@ -434,7 +431,7 @@ class ExecutionEngine():
             elif opcode == NZ:
 
                 x = estack.Pop().GetBigInteger()
-                estack.PushT( x is not 0)
+                estack.PushT(x is not 0)
 
             elif opcode == ADD:
 
@@ -476,8 +473,7 @@ class ExecutionEngine():
                 n = estack.Pop().GetBigInteger()
                 x = estack.Pop().GetBigInteger()
 
-                estack.PushT( x << n )
-
+                estack.PushT(x << n)
 
             elif opcode == SHR:
 
@@ -491,7 +487,7 @@ class ExecutionEngine():
                 x2 = estack.Pop().GetBoolean()
                 x1 = estack.Pop().GetBoolean()
 
-                estack.PushT( x1 and x2 )
+                estack.PushT(x1 and x2)
 
             elif opcode == BOOLOR:
 
@@ -505,8 +501,7 @@ class ExecutionEngine():
                 x2 = estack.Pop().GetBigInteger()
                 x1 = estack.Pop().GetBigInteger()
 
-                estack.PushT( x2 == x1 )
-
+                estack.PushT(x2 == x1)
 
             elif opcode == NUMNOTEQUAL:
 
@@ -543,20 +538,19 @@ class ExecutionEngine():
 
                 estack.PushT(x1 >= x2)
 
-
             elif opcode == MIN:
 
                 x2 = estack.Pop().GetBigInteger()
                 x1 = estack.Pop().GetBigInteger()
 
-                estack.PushT( min(x1, x2))
+                estack.PushT(min(x1, x2))
 
             elif opcode == MAX:
 
                 x2 = estack.Pop().GetBigInteger()
                 x1 = estack.Pop().GetBigInteger()
 
-                estack.PushT(max(x1,x2))
+                estack.PushT(max(x1, x2))
 
             elif opcode == WITHIN:
 
@@ -564,25 +558,24 @@ class ExecutionEngine():
                 a = estack.Pop().GetBigInteger()
                 x = estack.Pop().GetBigInteger()
 
-                estack.PushT( a <= x and x < b )
+                estack.PushT(a <= x and x < b)
 
-
-            #CRyPTO
+            # CRyPTO
             elif opcode == SHA1:
-                h = hashlib.sha1( estack.Pop().GetByteArray())
-                estack.PushT( h.digest())
+                h = hashlib.sha1(estack.Pop().GetByteArray())
+                estack.PushT(h.digest())
 
             elif opcode == SHA256:
-                h = hashlib.sha256( estack.Pop().GetByteArray())
-                estack.PushT( h.digest())
+                h = hashlib.sha256(estack.Pop().GetByteArray())
+                estack.PushT(h.digest())
 
             elif opcode == HASH160:
 
-                estack.PushT( self.Crypto.Hash160(estack.Pop().GetByteArray()))
+                estack.PushT(self.Crypto.Hash160(estack.Pop().GetByteArray()))
 
             elif opcode == HASH256:
 
-                estack.PushT( self.Crypto.Hash256(estack.Pop().GetByteArray()))
+                estack.PushT(self.Crypto.Hash256(estack.Pop().GetByteArray()))
 
             elif opcode == CHECKSIG:
 
@@ -591,15 +584,13 @@ class ExecutionEngine():
 
                 try:
 
-                    res = self.Crypto.VerifySignature( self.ScriptContainer.GetMessage(), sig, pubkey)
+                    res = self.Crypto.VerifySignature(self.ScriptContainer.GetMessage(), sig, pubkey)
                     estack.PushT(res)
 
                 except Exception as e:
-                    print("couldnt operate signature verification")
                     estack.PushT(False)
                     traceback.print_stack()
                     traceback.print_exc()
-
 
             elif opcode == CHECKMULTISIG:
 
@@ -611,7 +602,7 @@ class ExecutionEngine():
 
                 pubkeys = []
                 for i in range(0, n):
-                    pubkeys[i] = estack.Pop().GetByteArray()
+                    pubkeys.append(estack.Pop().GetByteArray())
 
                 m = estack.Pop().GetBigInteger()
 
@@ -622,7 +613,7 @@ class ExecutionEngine():
                 sigs = []
 
                 for i in range(0, m):
-                    m[i] = estack.Pop().GetByteArray()
+                    sigs.append(estack.Pop().GetByteArray())
 
                 message = self.ScriptContainer.GetMessage()
 
@@ -630,16 +621,16 @@ class ExecutionEngine():
 
                 try:
 
-                    i=0
-                    j=0
+                    i = 0
+                    j = 0
 
                     while fSuccess and i < m and j < n:
 
                         if self.Crypto.VerifySignature(message, sigs[i], pubkeys[j]):
-                            i+=1
-                        j+=1
+                            i += 1
+                        j += 1
 
-                        if m - i > j - n:
+                        if m - i > n - j:
                             fSuccess = False
 
                 except Exception as e:
@@ -647,17 +638,16 @@ class ExecutionEngine():
 
                 estack.PushT(fSuccess)
 
-
-            #lists
+            # lists
             elif opcode == ARRAYSIZE:
 
                 item = estack.Pop()
 
                 if not item.IsArray:
-                    estack.PushT( len(item.GetByteArray()))
+                    estack.PushT(len(item.GetByteArray()))
 
                 else:
-                    estack.PushT( len(item.GetArray()))
+                    estack.PushT(len(item.GetArray()))
 
             elif opcode == PACK:
 
@@ -671,7 +661,7 @@ class ExecutionEngine():
 
                 for i in range(0, size):
                     topack = estack.Pop()
-                    items.append( topack)
+                    items.append(topack)
 
                 estack.PushT(items)
 
@@ -710,7 +700,6 @@ class ExecutionEngine():
                     return
 
                 to_pick = items[index]
-
                 estack.PushT(to_pick)
 
             elif opcode == SETITEM:
@@ -769,14 +758,12 @@ class ExecutionEngine():
             if self.CurrentContext.InstructionPointer in self.CurrentContext.Breakpoints:
                 self._VMState |= VMState.BREAK
 
-
-
-
-
     def LoadScript(self, script, push_only=False):
 
         context = ExecutionContext(self, script, push_only)
         self._InvocationStack.PushT(context)
+
+        self._ExecutedScriptHashes.append(context.ScriptHash())
 
     def RemoveBreakPoint(self, position):
 
@@ -786,10 +773,12 @@ class ExecutionEngine():
 
     def StepInto(self):
         if self._InvocationStack.Count == 0:
+            logger.info("INVOCATION COUNT IS 0, HALT")
             self._VMState |= VMState.HALT
 
         if self._VMState & VMState.HALT > 0 or self._VMState & VMState.FAULT > 0:
-            self.__log.debug("stopping because vm state is %s " % self._VMState)
+            logger.info("stopping because vm state is %s " % self._VMState)
+            return
 
         op = None
 
@@ -799,24 +788,23 @@ class ExecutionEngine():
             op = self.CurrentContext.OpReader.ReadByte(do_ord=False)
 
 #        opname = ToName(op)
-#        print("____________________________________________________")
-#        print("%02x -> %s" % (int.from_bytes(op,byteorder='little'), opname))
-#        print("-----------------------------------")
+#        logger.info("____________________________________________________")
+#        logger.info("%02x -> %s" % (int.from_bytes(op,byteorder='little'), opname))
+#        logger.info("-----------------------------------")
 
         self.ops_processed += 1
 
         try:
             self.ExecuteOp(op, self.CurrentContext)
         except Exception as e:
-            self.__log.debug("could not execute op %s " % e)
-            self.__log.error("Exception", exc_info=1)
-            raise e
+            logger.error("COULD NOT EXECUTE OP: %s %s %s" % (e, op, ToName(op)))
+            logger.exception(e)
 
     def StepOut(self):
         self._VMState &= ~VMState.BREAK
         count = self._InvocationStack.Count
 
-        while   self._VMState & VMState.HALT == 0 and \
+        while self._VMState & VMState.HALT == 0 and \
                 self._VMState & VMState.FAULT == 0 and \
                 self._VMState & VMState.BREAK == 0 and \
                 self._InvocationStack.Count > count:
@@ -824,12 +812,13 @@ class ExecutionEngine():
             self.StepInto()
 
     def StepOver(self):
-        if self._VMState & VMState.HALT > 0 or self._VMState & VMState.FAULT > 0: return
+        if self._VMState & VMState.HALT > 0 or self._VMState & VMState.FAULT > 0:
+            return
 
         self._VMState &= ~VMState.BREAK
         count = self._InvocationStack.Count
 
-        while   self._VMState & VMState.HALT == 0 and \
+        while self._VMState & VMState.HALT == 0 and \
                 self._VMState & VMState.FAULT == 0 and \
                 self._VMState & VMState.BREAK == 0 and \
                 self._InvocationStack.Count > count:

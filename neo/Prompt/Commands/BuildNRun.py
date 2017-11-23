@@ -3,8 +3,12 @@ from neo.Prompt.Commands.LoadSmartContract import GatherLoadedContractParams
 from neo.Prompt.Commands.Invoke import test_deploy_and_invoke
 from neo.Fixed8 import Fixed8
 from boa.compiler import Compiler
+
 import binascii
 import traceback
+from prompt_toolkit import prompt
+from neo.Prompt.Commands.Invoke import InvokeContract
+
 
 def LoadAndRun(arguments, wallet):
 
@@ -30,24 +34,22 @@ def LoadAndRun(arguments, wallet):
         print("couldnt load script %s " % e)
 
 
-
 def BuildAndRun(arguments, wallet):
     path = get_arg(arguments)
 
     try:
         contract_script = Compiler.instance().load_and_save(path)
 
-        newpath = path.replace('.py' ,'.avm')
+        newpath = path.replace('.py', '.avm')
         print("Saved output to %s " % newpath)
 
-        DoRun(contract_script,arguments,wallet, path)
+        DoRun(contract_script, arguments, wallet, path)
 
     except Exception as e:
         print("couldn compile %s " % e)
 
 
 def DoRun(contract_script, arguments, wallet, path):
-
 
     try:
 
@@ -62,7 +64,7 @@ def DoRun(contract_script, arguments, wallet, path):
 
                 script = GatherLoadedContractParams(f_args, contract_script)
 
-                tx ,result,total_ops = test_deploy_and_invoke(script, i_args, wallet)
+                tx, result, total_ops = test_deploy_and_invoke(script, i_args, wallet)
                 i_args.reverse()
 
                 if tx is not None and result is not None:
@@ -73,19 +75,16 @@ def DoRun(contract_script, arguments, wallet, path):
                     print("Result %s " % result)
                     print("Invoke TX gas cost: %s " % (tx.Gas.value / Fixed8.D))
                     print("-------------------------------------------------------------\n")
+
                     return
                 else:
                     print("test ivoke failed")
                     print("tx is, results are %s %s " % (tx, result))
                     return
 
-
-
             else:
 
                 print("please open a wallet to test built contract")
-
-
 
     except Exception as e:
         print("could not bulid %s " % e)

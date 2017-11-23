@@ -1,8 +1,10 @@
-
-from .MemoryStream import MemoryStream,StreamManager
-from .BinaryReader import BinaryReader
 import importlib
+from logzero import logger
+
+from .MemoryStream import MemoryStream, StreamManager
+from .BinaryReader import BinaryReader
 from neo.Core.TX.Transaction import Transaction
+
 
 class Helper(object):
 
@@ -20,7 +22,7 @@ class Helper(object):
             serializable.Deserialize(reader)
             return serializable
         except Exception as e:
-            print("couldnt deserialize: %s " % e)
+            logger.error("couldnt deserialize: %s " % e)
         finally:
             StreamManager.ReleaseStream(mstream)
 

@@ -1,17 +1,21 @@
-from neo.Blockchain import GetBlockchain,GetStateReader
+import pdb
+
+from base58 import b58decode
+from logzero import logger
+
+from neo.Blockchain import GetBlockchain, GetStateReader
 from neo.Cryptography.Crypto import *
 from neo.IO.BinaryWriter import BinaryWriter
-from neo.IO.MemoryStream import MemoryStream,StreamManager
+from neo.IO.MemoryStream import MemoryStream, StreamManager
 from neo.UInt160 import UInt160
 from neo.VM.ScriptBuilder import ScriptBuilder
 from neo.SmartContract.ApplicationEngine import ApplicationEngine
 from neo.Fixed8 import Fixed8
 from neo.SmartContract import TriggerType
-from neo import Settings
-from base58 import b58decode
+from neo.Settings import settings
+
 
 class Helper(object):
-
 
     @staticmethod
     def WeightedFilter(list):
@@ -31,8 +35,6 @@ class Helper(object):
         StreamManager.ReleaseStream(ms)
         return retVal
 
-
-
     @staticmethod
     def Sign(verifiable, keypair):
 
@@ -42,7 +44,7 @@ class Helper(object):
         return res
 
     @staticmethod
-    def ToArray( value ):
+    def ToArray(value):
 
         ms = StreamManager.GetStream()
         writer = BinaryWriter(ms)
@@ -51,16 +53,15 @@ class Helper(object):
 
         retVal = ms.ToArray()
         StreamManager.ReleaseStream(ms)
-        
-        return retVal
 
+        return retVal
 
     @staticmethod
     def AddrStrToScriptHash(address):
         data = b58decode(address)
         if len(data) != 25:
             raise ValueError('Not correct Address, wrong length.')
-        if data[0] != Settings.ADDRESS_VERSION:
+        if data[0] != settings.ADDRESS_VERSION:
             raise ValueError('Not correct Coin Version')
 
         checksum = Crypto.Default().Hash256(data[:21])[:4]
@@ -72,7 +73,6 @@ class Helper(object):
     def ToScriptHash(scripts):
         return Crypto.Hash160(scripts)
 
-
     @staticmethod
     def RawBytesToScriptHash(raw):
         rawh = binascii.unhexlify(raw)
@@ -82,14 +82,11 @@ class Helper(object):
     @staticmethod
     def VerifyScripts(verifiable):
 
-
-
         try:
             hashes = verifiable.GetScriptHashesForVerifying()
         except Exception as e:
-            print("couldng get script hashes %s " % e)
+            logger.error("couldn't get script hashes %s " % e)
             return False
-
 
         if len(hashes) != len(verifiable.Scripts):
             return False
@@ -97,15 +94,14 @@ class Helper(object):
         for i in range(0, len(hashes)):
             verification = verifiable.Scripts[i].VerificationScript
 
-
             if len(verification) == 0:
-#                print("VERIFICATION IS 0, EMITTING APP CALL")
+                #                logger.info("VERIFICATION IS 0, EMITTING APP CALL")
                 sb = ScriptBuilder()
                 sb.EmitAppCall(hashes[i].Data)
                 verification = sb.ToArray()
 
             else:
-                verification_hash = Crypto.ToScriptHash(verification,unhex=False)
+                verification_hash = Crypto.ToScriptHash(verification, unhex=False)
                 if hashes[i] != verification_hash:
                     return False
 
@@ -114,11 +110,12 @@ class Helper(object):
             invoction = verifiable.Scripts[i].InvocationScript
             engine.LoadScript(invoction, True)
 
-            res =  engine.Execute()
+            res = engine.Execute()
             if not res:
-                print("engine did not execute")
+                logger.error("engine did not execute")
                 return False
 
+#            pdb.set_trace()
             if engine.EvaluationStack.Count != 1 or not engine.EvaluationStack.Pop().GetBoolean():
                 return False
 

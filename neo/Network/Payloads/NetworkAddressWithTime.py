@@ -1,12 +1,11 @@
-
-from neo.IO.Mixins import SerializableMixin
 import sys
 import ctypes
-from neo.Network.IPEndpoint import IPEndpoint
 from datetime import datetime
-from autologging import logged
 
-@logged
+from neo.Network.IPEndpoint import IPEndpoint
+from neo.IO.Mixins import SerializableMixin
+
+
 class NetworkAddressWithTime(SerializableMixin):
 
     NODE_NETWORK = 1
@@ -25,7 +24,6 @@ class NetworkAddressWithTime(SerializableMixin):
     def Size(self):
         return ctypes.sizeof(ctypes.c_uint) + ctypes.sizeof(ctypes.c_ulong) + 16 + ctypes.sizeof(ctypes.c_ushort)
 
-
     def Deserialize(self, reader):
         self.Timestamp = reader.ReadUInt32()
         self.Services = reader.ReadUInt64()
@@ -33,7 +31,7 @@ class NetworkAddressWithTime(SerializableMixin):
         addr.reverse()
         addr.strip(b'\x00')
         nums = []
-        for i in range(0,4):
+        for i in range(0, 4):
             nums.append(str(addr[i]))
         nums.reverse()
         adddd = '.'.join(nums)
@@ -43,9 +41,8 @@ class NetworkAddressWithTime(SerializableMixin):
     def Serialize(self, writer):
         writer.WriteUInt32(self.Timestamp)
         writer.WriteUInt64(self.Services)
-        writer.WriteFixedString(self.Address,16)
+        writer.WriteFixedString(self.Address, 16)
         writer.WriteUInt16(self.Port, endian='>')
-
 
     def ToString(self):
         return '%s:%s' % (self.Address, self.Port)
