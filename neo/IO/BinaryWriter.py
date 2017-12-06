@@ -48,11 +48,10 @@ class BinaryWriter(object):
         if unhex:
             try:
                 value = binascii.unhexlify(value)
-            except TypeError as t:
+            except TypeError:
                 pass
-            except binascii.Error as be:
+            except binascii.Error:
                 pass
-
         self.stream.write(value)
 
     def pack(self, fmt, data):
