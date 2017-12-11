@@ -1,6 +1,11 @@
 """
+Since: 2017-12-11
+
+Test Command:
+    build ./demo/contracts/AddTest.py test 0505 02 True True 1 2
+
 Import Command:
-    import contract ./demo/contracts/AddTest.avm 0505 05 True
+    import contract ./demo/contracts/AddTest.avm 0505 05 True True
 
 Expected Opcode:
               17  LOAD_FAST           a                                                 [data]
