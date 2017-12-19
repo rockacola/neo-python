@@ -3,6 +3,7 @@
 ## Get Started
 
 * To open demo wallet: `open wallet ./demo/wallets/neo-privnet.wallet`
+* To force sync of the wallet: `wallet rebuild`
 
 ## Developer References
 
