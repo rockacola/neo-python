@@ -4,13 +4,13 @@ REF: https://medium.com/proof-of-working/how-to-build-an-ico-on-neo-with-the-nex
 """
 """
 Test Command:
-    build ./demo/contracts/IncrementsPlus.py test 0710 05 True False increase
+    build ./demo/contracts/IncrementsPlus.py test 0710 05 True False show
 
 Test Response:
-    Calling ./demo/contracts/IncrementsPlus.py with arguments ['increase']
+    Calling ./demo/contracts/IncrementsPlus.py with arguments ['show']
     Test deploy invoke successful
-    Used total of 123 operations
-    Result b'\x01'
+    Used total of 111 operations
+    Result b'\x05'
     Invoke TX gas cost: 0.001
 
 Import Command:
@@ -24,12 +24,13 @@ Import Response:
     Deploy Invoke TX Fee: 0.0
 
 Example Invocation:
-    testinvoke fe4a4572c3906dadc3c2ba424d8b972f8f0b99ec show
+    testinvoke ef01fd868720e94dd042ab12efffc02584ed8a91 show
+    testinvoke ef01fd868720e94dd042ab12efffc02584ed8a91 increase [1]
 
 Example Response:
     Test invoke successful
-    Total operations: 91
-    Results ['Integer: 0 ']
+    Total operations: 219
+    Results ["ByteArray: bytearray(b'\\x00')", 'Integer: 1 ']
     Invoke TX gas cost: 0.0
     Invoke TX Fee: 0.001
 """
@@ -49,14 +50,12 @@ def Main(operation, args):
         return do_reset()
     elif operation == 'show':
         return do_show()
-    elif operation == 'context':
-        return do_context()
     elif operation == 'welcome':
         return do_welcome()
     elif operation == 'increase':
-        return do_increase()
+        return do_increase(args)
     elif operation == 'decrease':
-        return do_decrease()
+        return do_decrease(args)
 
     return 'unknown operation'
 
@@ -74,11 +73,6 @@ def do_show():
     currentCount += 0 # trick value to always be an integer
     return currentCount
 
-def do_context():
-    print("context triggered")
-    context = GetContext()
-    return context
-
 def do_reset():
     print("reset triggered")
     set_counter(0)
@@ -88,16 +82,26 @@ def do_welcome():
     print("welcome triggered")
     return 'Welcome to Increment2 contract!'
 
-def do_increase():
+def do_increase(args):
     print("increase triggered")
-    currentCount = get_counter()
-    currentCount += 1
-    set_counter(currentCount)
-    return currentCount
+    if (len(args) > 0):
+        val = args[0]
+        currentCount = get_counter()
+        currentCount += val
+        set_counter(currentCount)
+        return currentCount
+    else:
+        print("invalid input args")
+        return False
 
-def do_decrease():
+def do_decrease(args):
     print("decrease triggered")
-    currentCount = get_counter()
-    currentCount -= 1
-    set_counter(currentCount)
-    return currentCount
+    if (len(args) > 0):
+        val = args[0]
+        currentCount = get_counter()
+        currentCount -= val
+        set_counter(currentCount)
+        return currentCount
+    else:
+        print("invalid input args")
+        return False
