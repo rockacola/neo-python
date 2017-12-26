@@ -24,7 +24,7 @@ Import Response:
     Deploy Invoke TX Fee: 0.0
 
 Example Invocation:
-    testinvoke 0822b132f1498f49fd3ed90e18934c3c6b1a7a71 show
+    testinvoke fe4a4572c3906dadc3c2ba424d8b972f8f0b99ec show
 
 Example Response:
     Test invoke successful
@@ -45,30 +45,59 @@ def Main(operation, args):
     :return:
         bytearray: The result of the operation
     """
-    context = GetContext()
-    currentCount = Get(context, 'counter')
-
     if operation == 'reset':
-        print("reset triggered")
-        Put(context, 'counter', 0)
-        return 0
+        return do_reset()
     elif operation == 'show':
-        print("show triggered")
-        currentCount += 0
-        return currentCount
+        return do_show()
+    elif operation == 'context':
+        return do_context()
     elif operation == 'welcome':
-        print("welcome triggered")
-        return 'Welcome to Increment2 contract!'
+        return do_welcome()
     elif operation == 'increase':
-        print("increase triggered")
-        currentCount += 1
-        Put(context, 'counter', currentCount)
-        return currentCount
+        return do_increase()
     elif operation == 'decrease':
-        print("decrease triggered")
-        currentCount -= 1
-        Put(context, 'counter', currentCount)
-        return currentCount
-    else:
-        print("invalid parameter")
-        return 'unknown operation'
+        return do_decrease()
+
+    return 'unknown operation'
+
+def get_counter():
+    context = GetContext()
+    return Get(context, 'counter')
+
+def set_counter(val):
+    context = GetContext()
+    Put(context, 'counter', val)
+
+def do_show():
+    print("show triggered")
+    currentCount = get_counter()
+    currentCount += 0 # trick value to always be an integer
+    return currentCount
+
+def do_context():
+    print("context triggered")
+    context = GetContext()
+    return context
+
+def do_reset():
+    print("reset triggered")
+    set_counter(0)
+    return 0
+
+def do_welcome():
+    print("welcome triggered")
+    return 'Welcome to Increment2 contract!'
+
+def do_increase():
+    print("increase triggered")
+    currentCount = get_counter()
+    currentCount += 1
+    set_counter(currentCount)
+    return currentCount
+
+def do_decrease():
+    print("decrease triggered")
+    currentCount = get_counter()
+    currentCount -= 1
+    set_counter(currentCount)
+    return currentCount
