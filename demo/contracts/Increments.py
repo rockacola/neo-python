@@ -20,7 +20,8 @@ Import Response:
     Deploy Invoke TX Fee: 0.0
 
 Example Invocation:
-    testinvoke 5f58f9640b21913eba429417d689413095311430 increase
+    testinvoke c8b5b7d45d4cb48d9cf5f6b7d97f3214a0d6ff71 increase
+    testinvoke c8b5b7d45d4cb48d9cf5f6b7d97f3214a0d6ff71 show
 
 Example Response:
     Test invoke successful
