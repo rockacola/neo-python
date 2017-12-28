@@ -20,7 +20,7 @@ Test Response:
     Invoke TX gas cost: 0.001
 
 Import Command:
-    import contract ./demo/contracts/AccessControl.avm 07 02 True False
+    import contract ./demo/contracts/AccessControl.avm 0710 05 True False
 
 Import Response:
     Test deploy invoke successful
@@ -30,7 +30,7 @@ Import Response:
     Deploy Invoke TX Fee: 0.0
 
 Example Invocation:
-    testinvoke 10c5b1f79880b2751ef06d2e0c65d2b2babd0b7a version
+    testinvoke 4b96787b1a2f7f11cebdf2f3c5cf2899e1a1886a version
 
 Example Response:
     Test invoke successful
@@ -40,7 +40,9 @@ Example Response:
     Invoke TX Fee: 0.001
 
 More Example Invokes:
-    testinvoke 10c5b1f79880b2751ef06d2e0c65d2b2babd0b7a is_owner
+    testinvoke 4b96787b1a2f7f11cebdf2f3c5cf2899e1a1886a is_owner
+    testinvoke 4b96787b1a2f7f11cebdf2f3c5cf2899e1a1886a get_trigger
+    testinvoke 4b96787b1a2f7f11cebdf2f3c5cf2899e1a1886a get_tx
 """
 from boa.blockchain.vm.Neo.Storage import Get, Put, Delete, GetContext
 from boa.blockchain.vm.Neo.Runtime import Log, Notify, GetTrigger, CheckWitness
@@ -50,7 +52,7 @@ from boa.blockchain.vm.System.ExecutionEngine import GetScriptContainer
 # Global
 VERSION = 2
 OWNER = b'#\xba\'\x03\xc52c\xe8\xd6\xe5"\xdc2 39\xdc\xd8\xee\xe9' # script hash for address: AK2nJJpJr6o664CWJKi1QRXjqeic2zRp8y
-GAS_ASSET_ID = b'\xe7\x2d\x28\x69\x79\xee\x6c\xb1\xb7\xe6\x5d\xfd\xdf\xb2\xe3\x84\x10\x0b\x8d\x14\x8e\x77\x58\xde\x42\xe4\x16\x8b\x71\x79\x2c\x60';
+# GAS_ASSET_ID = b'\xe7\x2d\x28\x69\x79\xee\x6c\xb1\xb7\xe6\x5d\xfd\xdf\xb2\xe3\x84\x10\x0b\x8d\x14\x8e\x77\x58\xde\x42\xe4\x16\x8b\x71\x79\x2c\x60';
 
 def Main(operation, args):
     """
