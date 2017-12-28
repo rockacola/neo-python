@@ -44,10 +44,13 @@ More Example Invokes:
 """
 from boa.blockchain.vm.Neo.Storage import Get, Put, Delete, GetContext
 from boa.blockchain.vm.Neo.Runtime import Log, Notify, GetTrigger, CheckWitness
+from boa.blockchain.vm.Neo.Transaction import GetHash
+from boa.blockchain.vm.System.ExecutionEngine import GetScriptContainer
 
 # Global
+VERSION = 2
 OWNER = b'#\xba\'\x03\xc52c\xe8\xd6\xe5"\xdc2 39\xdc\xd8\xee\xe9' # script hash for address: AK2nJJpJr6o664CWJKi1QRXjqeic2zRp8y
-VERSION = 1
+GAS_ASSET_ID = b'\xe7\x2d\x28\x69\x79\xee\x6c\xb1\xb7\xe6\x5d\xfd\xdf\xb2\xe3\x84\x10\x0b\x8d\x14\x8e\x77\x58\xde\x42\xe4\x16\x8b\x71\x79\x2c\x60';
 
 def Main(operation, args):
     """
@@ -59,12 +62,33 @@ def Main(operation, args):
     """
     if operation == 'version':
         return do_version()
-    if operation == 'is_owner':
+    elif operation == 'get_trigger':
+        return do_get_trigger()
+    elif operation == 'get_tx':
+        return do_get_tx()
+    elif operation == 'is_owner':
         return do_is_owner()
     return 'unknown operation'
 
 def do_version():
-    return VERSION
+    version = VERSION
+    Notify(version)
+    return version
+
+def do_get_trigger():
+    trigger = GetTrigger()
+    return trigger
+
+def do_get_tx():
+    """Fetches the hash of the current transaction.
+
+    Return:
+        (str): hash of current transaction.
+    """
+    transaction = GetScriptContainer()
+    Log(transaction)
+    hash_val = GetHash(transaction)
+    return hash_val
 
 def do_is_owner():
     return CheckWitness(OWNER)

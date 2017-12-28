@@ -11,13 +11,15 @@
 
 * Address: `AK2nJJpJr6o664CWJKi1QRXjqeic2zRp8y`
 * WIF: `KxDgvEKzgSBPPfuVfw67oPQBSjidEiqTHURKSDL1R7yGaGYAeYnr`
-* Password: coz
+* Password: `coz`
+* Script hash: `b'#\xba\'\x03\xc52c\xe8\xd6\xe5"\xdc2 39\xdc\xd8\xee\xe9'`
 
 #### alfa
 
 * Address: `AbXMJ6JK494Q7QXuoM6H7s2LgotNWZe9XX`
 * WIF: `...`
-* Password: 1234567890
+* Password: `1234567890`
+* Script hash: `b'\xd8\xa3[\x14L\xa8\xd3\xfa\x00\xad\x83T\xed\xd2\x87G\xfb_\xffJ'`
 
 ## Developer References
 
