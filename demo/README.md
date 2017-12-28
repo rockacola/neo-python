@@ -5,6 +5,20 @@
 * To open demo wallet: `open wallet ./demo/wallets/neo-privnet.wallet`
 * To force sync of the wallet: `wallet rebuild`
 
+### Wallets
+
+#### neo-privnet
+
+* Address: `AK2nJJpJr6o664CWJKi1QRXjqeic2zRp8y`
+* WIF: `KxDgvEKzgSBPPfuVfw67oPQBSjidEiqTHURKSDL1R7yGaGYAeYnr`
+* Password: coz
+
+#### alfa
+
+* Address: `AbXMJ6JK494Q7QXuoM6H7s2LgotNWZe9XX`
+* WIF: `...`
+* Password: 1234567890
+
 ## Developer References
 
 To see list of opcodes:
