@@ -11,7 +11,7 @@ import binascii
 from neo.VM.OpCode import *
 from neo.IO.MemoryStream import MemoryStream
 from neo.Cryptography.Helper import base256_encode
-from neo.BigInteger import BigInteger
+from neocore.BigInteger import BigInteger
 import struct
 
 
@@ -170,6 +170,20 @@ class ScriptBuilder(object):
         if useTailCall:
             return self.Emit(TAILCALL, scriptHash)
         return self.Emit(APPCALL, scriptHash)
+
+    def EmitAppCallWithOperationAndArgs(self, script_hash, operation, args):
+        args.reverse()
+        for i in args:
+            self.push(i)
+        self.push(len(args))
+        self.Emit(PACK)
+        self.push(operation.encode('utf-8').hex())
+        self.Emit(APPCALL, script_hash.Data)
+
+    def EmitAppCallWithOperation(self, script_hash, operation):
+        self.push(False)
+        self.push(operation.encode('utf-8').hex())
+        self.Emit(APPCALL, script_hash.Data)
 
     def EmitSysCall(self, api):
         if api is None:
