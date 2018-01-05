@@ -1,6 +1,8 @@
 """
 Large Array Storage Test
 
+A simple utilise contract that allows you to manipulate a stored list for stress tests and GAS cost evaluation.
+
 Test Command:
     build ./demo/contracts/LargeArrayStorageTest.py test 0710 05 True False init
 
@@ -8,13 +10,10 @@ Import Command:
     import contract ./demo/contracts/LargeArrayStorageTest.avm 0710 05 True False
 
 Example Invocation:
-    testinvoke f49b166b363d0db75c5fe64b02103b54529b6d16 version
+    testinvoke 192e83f15785e52be85769156c1709fc390e3218 init
 
 More Example Invokes:
-    testinvoke f49b166b363d0db75c5fe64b02103b54529b6d16 get_alias ['AK2nJJpJr6o664CWJKi1QRXjqeic2zRp8y']
-    testinvoke f49b166b363d0db75c5fe64b02103b54529b6d16 set_alias ['AK2nJJpJr6o664CWJKi1QRXjqeic2zRp8y','lorem']
-    
-
+    testinvoke 192e83f15785e52be85769156c1709fc390e3218 count
 """
 from boa.blockchain.vm.Neo.Storage import Get, Put, Delete, GetContext
 from boa.blockchain.vm.Neo.Runtime import Log, Notify
@@ -41,43 +40,94 @@ def Main(operation, args):
         return do_count()
     elif operation == 'append_1':
         return do_append_1()
+    elif operation == 'append_10':
+        return do_append_10()
     else:
         Notify('unknown operation')
         return False
 
 def do_init():
+    """
+    Initialize the storage by setting an empty list.
+
+    :return: indication success execution of the command
+    :rtype: bool
+    """
     context = GetContext()
     init_list_bytes = serialize_array([])
     Put(context, KEY, init_list_bytes)
     return True
 
 def do_delete():
+    """
+    Delete the storage and reset back to its default state.
+
+    :return: indication success execution of the command
+    :rtype: bool
+    """
     context = GetContext()
     Delete(context, KEY)
     return True
 
 def do_fetch():
+    """
+    Fetch current list value from storage.
+
+    :return: the stored list value
+    :rtype: list
+    """
     context = GetContext()
     list_bytes = Get(context, KEY)
-    Log('list_bytes:')
-    Log(list_bytes)
     return deserialize_bytearray(list_bytes)
 
 def do_count():
+    """
+    Fetch length of the stored list.
+
+    :return: the stored list value
+    :rtype: int
+    """
     context = GetContext()
     list_bytes = Get(context, KEY)
-    Log('list_bytes:')
-    Log(list_bytes)
     item_list = deserialize_bytearray(list_bytes)
     return len(item_list)
 
 def do_append_1():
+    """
+    Add 1 item into the list in storage.
+
+    :return: indication success execution of the command
+    :rtype: bool
+    """
     context = GetContext()
     list_bytes = Get(context, KEY)
-    Log('list_bytes:')
-    Log(list_bytes)
     item_list = deserialize_bytearray(list_bytes)
     item_list.append('single item')
+    list_length = len(item_list)
+    Log('new list length:')
+    Log(list_length)
+    list_bytes = serialize_array(item_list)
+    Put(context, KEY, list_bytes)
+    return True
+
+def do_append_10():
+    """
+    Add 10 items into the list in storage.
+
+    :return: indication success execution of the command
+    :rtype: bool
+    """
+    context = GetContext()
+    list_bytes = Get(context, KEY)
+    item_list = deserialize_bytearray(list_bytes)
+    addition_list = [
+        '1 of 10', '1 of 10', '1 of 10', '1 of 10', '1 of 10', '1 of 10', '1 of 10', '1 of 10', '1 of 10', '1 of 10'
+    ]
+    for item in addition_list:
+        item_list.append(item)
+    list_length = len(item_list)
+    Log('new list length:')
+    Log(list_length)
     list_bytes = serialize_array(item_list)
     Put(context, KEY, list_bytes)
     return True
