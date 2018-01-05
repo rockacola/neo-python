@@ -3,6 +3,14 @@ NeoAlias Smart Contract
 
 Give alias to wallet addresses
 
+TODO:
+    - Modularise into classes
+    - Doc comment
+    - Hard cap 10 aliases per address
+    - Hard cap 20 characters per alias
+    - Use another storage to keep track of alias count
+    - Validate input address
+    - Validate input alias (with regex)
 """
 """
 Test Command:
@@ -17,8 +25,6 @@ Example Invocation:
 More Example Invokes:
     testinvoke f49b166b363d0db75c5fe64b02103b54529b6d16 get_alias ['AK2nJJpJr6o664CWJKi1QRXjqeic2zRp8y']
     testinvoke f49b166b363d0db75c5fe64b02103b54529b6d16 set_alias ['AK2nJJpJr6o664CWJKi1QRXjqeic2zRp8y','lorem']
-    
-
 """
 from boa.blockchain.vm.Neo.Storage import Get, Put, GetContext
 from boa.blockchain.vm.Neo.Runtime import Log, Notify, CheckWitness
