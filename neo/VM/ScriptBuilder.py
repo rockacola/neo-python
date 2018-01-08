@@ -46,7 +46,7 @@ class ScriptBuilder(object):
             return self.WriteUInt16(value, endian)
 
         elif value <= 0xFFFFFFFF:
-            self.WriteByte(0xfd)
+            self.WriteByte(0xfe)
             return self.WriteUInt32(value, endian)
 
         else:
@@ -170,6 +170,11 @@ class ScriptBuilder(object):
         if useTailCall:
             return self.Emit(TAILCALL, scriptHash)
         return self.Emit(APPCALL, scriptHash)
+
+    def EmitAppCallWithOperationAndData(self, script_hash, operation, data):
+        self.push(data)
+        self.push(operation.encode('utf-8').hex())
+        self.Emit(APPCALL, script_hash.Data)
 
     def EmitAppCallWithOperationAndArgs(self, script_hash, operation, args):
         args.reverse()
