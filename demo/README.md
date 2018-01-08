@@ -2,6 +2,7 @@
 
 ## Get Started
 
+* Install dependencies: `pip3 install -r requirements.txt`
 * Start prompt: `python3 prompt.py -p`
 * To open demo wallet: `open wallet ./demo/wallets/neo-privnet.wallet`
 * To force sync of the wallet: `wallet rebuild`
