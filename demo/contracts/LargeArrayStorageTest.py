@@ -4,16 +4,15 @@ Large Array Storage Test
 A simple utilise contract that allows you to manipulate a stored list for stress tests and GAS cost evaluation.
 
 Test Command:
-    build ./demo/contracts/LargeArrayStorageTest.py test 0710 05 True False init
+    build [FILE_PATH] test 0710 05 True False init
 
-Import Command:
-    import contract ./demo/contracts/LargeArrayStorageTest.avm 0710 05 True False
-
-Example Invocation:
-    testinvoke 192e83f15785e52be85769156c1709fc390e3218 init
-
-More Example Invokes:
-    testinvoke 192e83f15785e52be85769156c1709fc390e3218 count
+Example Executions:
+    testinvoke [CONTRACT_HASH] init
+    testinvoke [CONTRACT_HASH] delete
+    testinvoke [CONTRACT_HASH] fetch
+    testinvoke [CONTRACT_HASH] count
+    testinvoke [CONTRACT_HASH] append_1
+    testinvoke [CONTRACT_HASH] append_10
 """
 from boa.blockchain.vm.Neo.Storage import Get, Put, Delete, GetContext
 from boa.blockchain.vm.Neo.Runtime import Log, Notify
@@ -22,13 +21,16 @@ from boa.code.builtins import concat, list, range, take, substr
 # -- Global variables
 KEY = 'test_array'
 
+
 def Main(operation, args):
     """
 
-    :param operation: str The name of the operation to perform
-    :param args: list A list of arguments along with the operation
-    :return:
-        bytearray: The result of the operation
+    :param operation: The name of the operation to perform
+    :param args: A list of arguments along with the operation
+    :type operation: str
+    :type args: list
+    :return: The result of the operation
+    :rtype: bytearray
     """
     if operation == 'init':
         return do_init()
@@ -46,6 +48,7 @@ def Main(operation, args):
         Notify('unknown operation')
         return False
 
+
 def do_init():
     """
     Initialize the storage by setting an empty list.
@@ -58,6 +61,7 @@ def do_init():
     Put(context, KEY, init_list_bytes)
     return True
 
+
 def do_delete():
     """
     Delete the storage and reset back to its default state.
@@ -68,6 +72,7 @@ def do_delete():
     context = GetContext()
     Delete(context, KEY)
     return True
+
 
 def do_fetch():
     """
@@ -80,6 +85,7 @@ def do_fetch():
     list_bytes = Get(context, KEY)
     return deserialize_bytearray(list_bytes)
 
+
 def do_count():
     """
     Fetch length of the stored list.
@@ -91,6 +97,7 @@ def do_count():
     list_bytes = Get(context, KEY)
     item_list = deserialize_bytearray(list_bytes)
     return len(item_list)
+
 
 def do_append_1():
     """
@@ -109,6 +116,7 @@ def do_append_1():
     list_bytes = serialize_array(item_list)
     Put(context, KEY, list_bytes)
     return True
+
 
 def do_append_10():
     """
@@ -132,7 +140,6 @@ def do_append_10():
     Put(context, KEY, list_bytes)
     return True
 
-# -- Utility methods
 
 def deserialize_bytearray(data):
 
@@ -166,6 +173,7 @@ def deserialize_bytearray(data):
 
     return new_collection
 
+
 def serialize_array(items):
 
     # serialize the length of the list
@@ -188,6 +196,7 @@ def serialize_array(items):
 
     # return the stuff
     return output
+
 
 def serialize_var_length_item(item):
 
