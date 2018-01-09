@@ -19,8 +19,7 @@ Invalid Examples:
 False Positive Examples:
     testinvoke [CONTRACT_HASH] concat [0.9,1.23]
 """
-from boa.blockchain.vm.Neo.Storage import Get, Put, Delete, GetContext
-from boa.blockchain.vm.Neo.Runtime import Log, Notify
+from boa.blockchain.vm.Neo.Runtime import Notify
 from boa.code.builtins import concat
 
 
