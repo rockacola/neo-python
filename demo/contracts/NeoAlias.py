@@ -20,19 +20,21 @@ Import Command:
     import contract ./demo/contracts/NeoAlias.avm 0710 05 True False
 
 Example Invocation:
-    testinvoke f49b166b363d0db75c5fe64b02103b54529b6d16 version
+    testinvoke 4f74c41ce60dcc8abb6f5b396935430f9d3b1db1 version
 
 More Example Invokes:
-    testinvoke f49b166b363d0db75c5fe64b02103b54529b6d16 get_alias ['AK2nJJpJr6o664CWJKi1QRXjqeic2zRp8y']
-    testinvoke f49b166b363d0db75c5fe64b02103b54529b6d16 set_alias ['AK2nJJpJr6o664CWJKi1QRXjqeic2zRp8y','lorem']
+    testinvoke 4f74c41ce60dcc8abb6f5b396935430f9d3b1db1 get_alias ['AK2nJJpJr6o664CWJKi1QRXjqeic2zRp8y']
+    testinvoke 4f74c41ce60dcc8abb6f5b396935430f9d3b1db1 set_alias ['AK2nJJpJr6o664CWJKi1QRXjqeic2zRp8y','lorem']
 """
-from boa.blockchain.vm.Neo.Storage import Get, Put, GetContext
-from boa.blockchain.vm.Neo.Runtime import Log, Notify, CheckWitness
+from boa.blockchain.vm.Neo.Runtime import Log, Notify, GetTrigger, CheckWitness
+from boa.blockchain.vm.Neo.Blockchain import GetHeight, GetHeader
+from boa.blockchain.vm.Neo.Action import RegisterAction
+from boa.blockchain.vm.Neo.TriggerType import Application, Verification
+from boa.blockchain.vm.Neo.Storage import GetContext, Get, Put, Delete
 from boa.code.builtins import concat, list, range, take, substr
 
-
 # Global
-VERSION = 4
+VERSION = 5
 OWNER = b'#\xba\'\x03\xc52c\xe8\xd6\xe5"\xdc2 39\xdc\xd8\xee\xe9' # script hash for address: AK2nJJpJr6o664CWJKi1QRXjqeic2zRp8y
 # NEO_ASSET_ID = b'\x9b|\xff\xda\xa6t\xbe\xae\x0f\x93\x0e\xbe`\x85\xaf\x90\x93\xe5\xfeV\xb3J\\"\x0c\xcd\xcfn\xfc3o\xc5'
 # GAS_ASSET_ID = b'\xe7-(iy\xeel\xb1\xb7\xe6]\xfd\xdf\xb2\xe3\x84\x10\x0b\x8d\x14\x8ewX\xdeB\xe4\x16\x8bqy,`'
@@ -40,34 +42,48 @@ OWNER = b'#\xba\'\x03\xc52c\xe8\xd6\xe5"\xdc2 39\xdc\xd8\xee\xe9' # script hash 
 def Main(operation, args):
     """
 
-    :param operation: str The name of the operation to perform
-    :param args: list A list of arguments along with the operation
-    :return:
-        bytearray: The result of the operation
+    :param operation: The name of the operation to perform
+    :param args: A list of arguments along with the operation
+    :type operation: str
+    :type args: list
+    :return: The result of the operation
+    :rtype: bytearray
     """
-    if operation == None:
-        return do_none()
-    elif operation == 'version':
-        return do_version()
-    elif operation == 'is_owner':
-        return do_is_owner()
-    elif operation == 'set_alias':
-        return do_set_alias(args)
-    elif operation == 'get_alias':
-        return do_get_alias(args)
-    return do_invalid()
+    trigger = GetTrigger()
 
-def do_none():
-    Notify('operation name is required')
+    if trigger == Verification():
+        is_owner = CheckWitness(OWNER)
+        Log('Check is_owner:')
+        Log(is_owner)
+        if is_owner:
+            return True
+        return False
+
+    elif trigger == Application():
+        if operation == 'version':
+            return do_version()
+        elif operation == 'is_owner':
+            return do_is_owner()
+        elif operation == 'set_alias':
+            return do_set_alias(args)
+        elif operation == 'get_alias':
+            return do_get_alias(args)
+        Log('unknown operation')
+        return False
+
+    Log('invalid request')
     return False
+
 
 def do_version():
     version = VERSION
     Notify(version)
     return version
 
+
 def do_is_owner():
     return CheckWitness(OWNER)
+
 
 def do_set_alias(args):
     if len(args) > 1:
@@ -78,6 +94,7 @@ def do_set_alias(args):
     Notify('invalid argument length')
     return False
 
+
 def do_get_alias(args):
     if len(args) > 0:
         context = GetContext()
@@ -86,9 +103,6 @@ def do_get_alias(args):
     Notify('invalid argument length')
     return False
 
-def do_invalid():
-    Notify('unknown operation')
-    return False
 
 def set_alias(context, address, new_alias):
     alias_list_bytes = Get(context, address)
@@ -105,6 +119,7 @@ def set_alias(context, address, new_alias):
         Put(context, address, alias_list_bytes)
         return True
 
+
 def get_aliases(context, address):
     alias_list_bytes = Get(context, address)
     if not alias_list_bytes:
@@ -112,6 +127,7 @@ def get_aliases(context, address):
         return ''
     else:
         return deserialize_bytearray(alias_list_bytes)
+
 
 def deserialize_bytearray(data):
 
@@ -147,6 +163,7 @@ def deserialize_bytearray(data):
 
     return new_collection
 
+
 def serialize_array(items):
 
     # serialize the length of the list
@@ -169,6 +186,7 @@ def serialize_array(items):
 
     # return the stuff
     return output
+
 
 def serialize_var_length_item(item):
 
