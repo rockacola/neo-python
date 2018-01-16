@@ -275,6 +275,7 @@ class PromptInterface(object):
                 self.Wallet._current_height = item2
         except Exception as e:
             pass
+        print('[do_rebuild_wallet exits]')
 
     def do_import(self, arguments):
         item = get_arg(arguments)
