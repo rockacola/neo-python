@@ -25,6 +25,7 @@ from neo.IO.MemoryStream import StreamManager
 from neo.Implementations.Blockchains.LevelDB.LevelDBBlockchain import LevelDBBlockchain
 from neo.Implementations.Blockchains.LevelDB.DebugStorage import DebugStorage
 from neo.Implementations.Wallets.peewee.UserWallet import UserWallet
+from neo.Implementations.Notifications.LevelDB.NotificationDB import NotificationDB
 from neo.Network.NodeLeader import NodeLeader
 from neo.Prompt.Commands.BuildNRun import BuildAndRun, LoadAndRun
 from neo.Prompt.Commands.Invoke import InvokeContract, TestInvokeContract, test_invoke
@@ -40,7 +41,7 @@ from neo.Prompt.Commands.Wallet import DeleteAddress, ImportWatchAddr, ImportTok
 from neo.Prompt.Utils import get_arg
 from neo.Settings import settings, DIR_PROJECT_ROOT
 from neo.UserPreferences import preferences
-from neo.Wallets.KeyPair import KeyPair
+from neocore.KeyPair import KeyPair
 
 # Logfile settings & setup
 LOGFILE_FN = os.path.join(DIR_PROJECT_ROOT, 'prompt.log')
@@ -70,6 +71,7 @@ class PromptInterface(object):
                 'asset search {query}',
                 'contract {contract hash}',
                 'contract search {query}',
+                'notifications {block_number or address}',
                 'mem',
                 'nodes',
                 'state',
@@ -150,7 +152,7 @@ class PromptInterface(object):
                                 'wallet', 'contract', 'asset', 'wif',
                                 'watch_addr', 'contract_addr', 'testinvoke', 'tkn_send',
                                 'tkn_mint', 'tkn_send_from', 'tkn_approve', 'tkn_allowance',
-                                'build', ]
+                                'build', 'notifications', ]
 
         if self.Wallet:
             for addr in self.Wallet.Addresses:
@@ -172,6 +174,7 @@ class PromptInterface(object):
     def quit(self):
         print('Shutting down.  This may take a bit...')
         self.go_on = False
+        NotificationDB.close()
         Blockchain.Default().Dispose()
         reactor.stop()
         NodeLeader.Instance().Shutdown()
@@ -444,6 +447,34 @@ class PromptInterface(object):
         else:
             WithdrawOne(self.Wallet)
 
+    def do_notifications(self, arguments):
+
+        if NotificationDB.instance() is None:
+            print("No notification DB Configured")
+            return
+
+        item = get_arg(arguments, 0)
+        events = []
+        if len(item) == 34:
+            addr = item
+            events = NotificationDB.instance().get_by_addr(addr)
+        else:
+            try:
+                block_height = int(item)
+                if block_height < Blockchain.Default().Height:
+                    events = NotificationDB.instance().get_by_block(block_height)
+                else:
+                    print("block %s not found" % block_height)
+                    return
+            except Exception as e:
+                print("could not parse block height %s " % e)
+                return
+
+        if len(events):
+            [print(json.dumps(e.ToJson(), indent=4)) for e in events]
+        else:
+            print("No events found for %s " % item)
+
     def show_wallet(self, arguments):
 
         if not self.Wallet:
@@ -471,7 +502,7 @@ class PromptInterface(object):
         elif item == 'close':
             self.do_close_wallet()
         elif item == 'claim':
-            ClaimGas(self.Wallet)
+            ClaimGas(self.Wallet, True, arguments[1:])
         elif item == 'rebuild':
             self.do_rebuild_wallet(arguments)
         elif item == 'tkn_send':
@@ -872,6 +903,8 @@ class PromptInterface(object):
                         self.make_withdraw_request(arguments)
                     elif command == 'withdraw':
                         self.do_withdraw(arguments)
+                    elif command == 'notifications':
+                        self.do_notifications(arguments)
                     elif command == 'mem':
                         self.show_mem()
                     elif command == 'nodes' or command == 'node':
@@ -930,6 +963,10 @@ def main():
     # Instantiate the blockchain and subscribe to notifications
     blockchain = LevelDBBlockchain(settings.LEVELDB_PATH)
     Blockchain.RegisterBlockchain(blockchain)
+
+    # Try to set up a notification db
+    if NotificationDB.instance():
+        NotificationDB.instance().start()
 
     # Start the prompt interface
     cli = PromptInterface()
