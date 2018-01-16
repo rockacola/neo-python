@@ -10,8 +10,8 @@ from neo.Core.State.StorageItem import StorageItem
 from neo.Core.State.StorageKey import StorageKey
 from neo.Core.State.ValidatorState import ValidatorState
 from neo.Core.AssetType import AssetType
-from neo.Cryptography.Crypto import Crypto
-from neo.Cryptography.ECCurve import ECDSA
+from neocore.Cryptography.Crypto import Crypto
+from neocore.Cryptography.ECCurve import ECDSA
 from neocore.UInt160 import UInt160
 from neocore.UInt256 import UInt256
 from neocore.Fixed8 import Fixed8
@@ -482,9 +482,10 @@ class StateMachine(StateReader):
         else:
             engine.EvaluationStack.PushT(bytearray([0]))
 
-        dispatch_smart_contract_event(SmartContractEvent.STORAGE_GET, '%s -> %s' % (keystr, valStr),
-                                      context.ScriptHash, Blockchain.Default().Height,
-                                      engine.ScriptContainer.Hash, test_mode=engine.testMode)
+        self.events_to_dispatch.append(
+            SmartContractEvent(SmartContractEvent.STORAGE_GET, ['%s -> %s' % (keystr, valStr)],
+                               context.ScriptHash, Blockchain.Default().Height,
+                               engine.ScriptContainer.Hash, test_mode=engine.testMode))
 
         return True
 
@@ -522,9 +523,10 @@ class StateMachine(StateReader):
             except Exception as e:
                 pass
 
-        dispatch_smart_contract_event(SmartContractEvent.STORAGE_PUT, '%s -> %s' % (keystr, valStr),
-                                      context.ScriptHash, Blockchain.Default().Height,
-                                      engine.ScriptContainer.Hash, test_mode=engine.testMode)
+        self.events_to_dispatch.append(
+            SmartContractEvent(SmartContractEvent.STORAGE_PUT, ['%s -> %s' % (keystr, valStr)],
+                               context.ScriptHash, Blockchain.Default().Height,
+                               engine.ScriptContainer.Hash, test_mode=engine.testMode))
 
         return True
 
@@ -544,9 +546,9 @@ class StateMachine(StateReader):
         if len(key) == 20:
             keystr = Crypto.ToAddress(UInt160(data=key))
 
-        dispatch_smart_contract_event(SmartContractEvent.STORAGE_DELETE, keystr,
-                                      context.ScriptHash, Blockchain.Default().Height,
-                                      engine.ScriptContainer.Hash, test_mode=engine.testMode)
+            self.events_to_dispatch.append(SmartContractEvent(SmartContractEvent.STORAGE_DELETE, [keystr],
+                                                              context.ScriptHash, Blockchain.Default().Height,
+                                                              engine.ScriptContainer.Hash, test_mode=engine.testMode))
 
         self._storages.Remove(storage_key.GetHashCodeBytes())
 

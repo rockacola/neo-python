@@ -13,9 +13,9 @@ from neo.Core.Blockchain import Blockchain
 from neo.Core.CoinReference import CoinReference
 from neo.Core.TX.Transaction import TransactionOutput
 from neo.Core.TX.Transaction import Transaction as CoreTransaction
-from neo.Wallets.KeyPair import KeyPair as WalletKeyPair
+from neocore.KeyPair import KeyPair as WalletKeyPair
 from neo.Wallets.NEP5Token import NEP5Token as WalletNEP5Token
-from neo.Cryptography.Crypto import Crypto
+from neocore.Cryptography.Crypto import Crypto
 from neocore.UInt160 import UInt160
 from neocore.Fixed8 import Fixed8
 from neocore.UInt256 import UInt256
@@ -28,7 +28,6 @@ import json
 
 
 class UserWallet(Wallet):
-
     Version = None
 
     __dbaccount = None
@@ -296,7 +295,6 @@ class UserWallet(Wallet):
         ctr = {}
 
         for ct in Contract.select():
-
             data = binascii.unhexlify(ct.RawData)
             contract = Helper.AsSerializableWithType(data, 'neo.SmartContract.Contract.Contract')
             ctr[contract.ScriptHash.ToBytes()] = contract
@@ -502,7 +500,6 @@ class UserWallet(Wallet):
 
             address = c.Address
             if address.ScriptHash == todelete:
-
                 c.delete_instance()
                 address.delete_instance()
 
@@ -544,7 +541,8 @@ class UserWallet(Wallet):
                     has_watch_addr = True
             else:
                 token_balances = self.TokenBalancesForAddress(addr_str)
-                json = {'script_hash': addr_str, 'tokens': token_balances}
+                script_hash = binascii.hexlify(addr.ScriptHash)
+                json = {'address': addr_str, 'script_hash': script_hash.decode('utf8'), 'tokens': token_balances}
                 addresses.append(json)
 
         balances = []

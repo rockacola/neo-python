@@ -10,6 +10,7 @@ import json
 import os
 import logging
 from json.decoder import JSONDecodeError
+from neocore.Cryptography import Helper
 
 import logzero
 
@@ -45,6 +46,7 @@ class SettingsHolder:
     REGISTER_TX_FEE = None
 
     LEVELDB_PATH = None
+    NOTIFICATION_DB_PATH = None
     NODE_PORT = None
     WS_PORT = None
     URI_PREFIX = None
@@ -107,8 +109,13 @@ class SettingsHolder:
         self.VERSION_NAME = config['VersionName']
         self.BOOTSTRAP_FILE = config['BootstrapFile']
 
+        Helper.ADDRESS_VERSION = self.ADDRESS_VERSION
+
         if 'DebugStorage' in config:
             self.USE_DEBUG_STORAGE = config['DebugStorage']
+
+        if 'NotificationDataPath' in config:
+            self.NOTIFICATION_DB_PATH = os.path.join(DIR_PROJECT_ROOT, config['NotificationDataPath'])
 
     def setup_mainnet(self):
         """ Load settings from the mainnet JSON config file """
