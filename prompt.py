@@ -266,6 +266,7 @@ class PromptInterface(object):
             print("closed wallet %s " % path)
 
     def do_rebuild_wallet(self, arguments):
+        print('Rebuilding wallet...')
         self.Wallet.Rebuild()
         try:
             item2 = int(get_arg(arguments, 1))
@@ -274,7 +275,6 @@ class PromptInterface(object):
                 self.Wallet._current_height = item2
         except Exception as e:
             pass
-        print('Wallet rebuild complete.')
 
     def do_import(self, arguments):
         item = get_arg(arguments)
