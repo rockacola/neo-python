@@ -14,10 +14,10 @@ TODO:
 """
 """
 Test Command:
-    build ./demo/contracts/NeoAlias.py test 0710 05 True False version
+    build ./demo/contracts/projects/NeoAlias.py test 0710 05 True False version
 
 Import Command:
-    import contract ./demo/contracts/NeoAlias.avm 0710 05 True False
+    import contract ./demo/contracts/projects/NeoAlias.avm 0710 05 True False
 
 Example Invocation:
     testinvoke 4f74c41ce60dcc8abb6f5b396935430f9d3b1db1 version
