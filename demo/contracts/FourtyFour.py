@@ -28,6 +28,7 @@ Expected Opcode:
               11  RETURN_VALUE                                                          [data]
 
 Example Invocation:
+    testinvoke 51606190e821645403ff153d50c1a8e8320ac55a
 
 Example Response:
 
