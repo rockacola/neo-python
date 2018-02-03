@@ -1,12 +1,18 @@
 """
+MORE WORK NEEDED
+
+Random Test
+
+Test obtaining random generated values via different methods.
+
 Test Command:
-    build ./demo/contracts/Random.py test 0710 05 True False version
-
-Import Command:
-    import contract ./demo/contracts/Random.avm 07 02 True False
-
-Example Invokes:
-    testinvoke f9bc3d85ef1ef08d72927b4bb714a0d9d92fccc3 version
+    build [FILE_PATH] test 0710 05 True False version
+    build ./demo/contracts/RandomTest.py test 0710 05 True False version
+    import contract ./demo/contracts/RandomTest.avm 0710 05 True False
+Example Executions:
+    testinvoke [CONTRACT_HASH] version
+False Positive Examples:
+Invalid Examples:
 """
 from boa.blockchain.vm.Neo.Storage import Get, Put, Delete, GetContext
 from boa.blockchain.vm.Neo.Blockchain import GetHeight, GetHeader
@@ -15,7 +21,7 @@ from boa.blockchain.vm.Neo.Transaction import GetHash
 from boa.blockchain.vm.System.ExecutionEngine import GetScriptContainer
 
 # Global
-VERSION = 1
+VERSION = 2
 
 def Main(operation, args):
     """
@@ -33,39 +39,30 @@ def Main(operation, args):
         return do_timestamp()
     elif operation == 'consensus':
         return do_consensus()
-    elif operation == 'random':
-        return do_random()
     return 'unknown operation'
+
 
 def do_version():
     version = VERSION
     return version
 
+
 def do_height():
     current_height = GetHeight()
     return current_height
+
 
 def do_timestamp():
     current_block = get_block()
     current_time = current_block.Timestamp
     return current_time
 
+
 def do_consensus():
     current_block = get_block()
     current_consensus = current_block.ConsensusData
     return current_consensus
 
-def do_random():
-    # current_height = GetHeight()
-    # Log('current_height:')
-    # Log(current_height)
-    # current_block = GetHeader(current_height)
-    # Log('current_block:')
-    # Log(current_block)
-    # current_time = current_block.Timestamp
-    # Log('current_time:')
-    # Log(current_time)
-    return False
 
 def get_block():
     current_height = GetHeight()

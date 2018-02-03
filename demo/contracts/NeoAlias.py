@@ -60,14 +60,34 @@ def Main(operation, args):
         return False
 
     elif trigger == Application():
+
         if operation == 'version':
-            return do_version()
-        elif operation == 'is_owner':
-            return do_is_owner()
+            version = VERSION
+            Notify(version)
+            return version
+
+        elif operation == 'remove_all_alias':
+            if len(args) == 1:
+                address = args[0]
+                result = do_remove_all_alias(address)
+                return result
+            Log('invalid parameters')
+            return False
+
+        elif operation == 'add_alias':
+            if len(args) == 2:
+                address = args[0]
+                alias = args[1]
+                result = do_add_alias(address, alias)
+            Log('invalid parameters')
+            return False
+
         elif operation == 'set_alias':
             return do_set_alias(args)
+
         elif operation == 'get_alias':
             return do_get_alias(args)
+
         Log('unknown operation')
         return False
 
@@ -75,15 +95,77 @@ def Main(operation, args):
     return False
 
 
-def do_version():
-    version = VERSION
-    Notify(version)
-    return version
+def do_remove_all_alias(address):
+    """
+    Remove all alias of specified address
+
+    :param address: The target wallet hash
+    :type address: str
+    :return: Indication success of the execution
+    :rtype: bool
+
+    :todo: validate input address
+    """
+    context = GetContext()
+    result = set_count(context, address, 0)
+    return result
 
 
-def do_is_owner():
-    return CheckWitness(OWNER)
+def do_add_alias(address, alias):
+    """
+    Add a new alias to the specified address
 
+    :param address: The target wallet hash
+    :type address: str
+    :param address: Alias to be assigned to
+    :type address: str
+
+    :return: Current alias count
+    :rtype: int
+
+    :todo: validate input address
+    :todo: validate input alias
+    :todo: check if the given alias already exists
+    """
+    context = GetContext()
+    current_count = get_count(context, address)
+    foo = set_alias_on_index(context, address, current_count, alias)
+    new_count = current_count + 1
+    return new_count
+
+
+def set_alias_on_index(context, address, index, alias):
+    alias_key = get_alias_index_key(address, index)
+    Put(context, alias_key, alias)
+    return False
+
+
+def get_count(context, address):
+    """
+    :todo: null check, return 0 if that's the case
+    """
+    count_key = get_count_key(address)
+    count = Get(context, count_key)
+    return count
+
+
+def set_count(context, address, value):
+    count_key = get_count_key(address)
+    Put(context, count_key, value)
+    return True
+
+
+def get_alias_index_key(address, index):
+    key = concat(address, '_')
+    key = concat(key, index)
+    return key
+
+
+def get_count_key(address):
+    key = concat(address, '_count')
+    return key
+
+# --
 
 def do_set_alias(args):
     if len(args) > 1:
