@@ -2,12 +2,15 @@
 TODO:
 - Add n numbers together
 - Get 2^n
-- Get Fibonacci
 - Get current block height
 - Get current transaction hash
 - Get invoker's address
 - Get attached asset details
 - Get string name of the type of input argument
+- Get string length
+- Get reverse of a string
+- Concate 2 strings together
+- Concate n strings together
 
 Test Command:
     build ./demo/contracts/UtilContract.py test 0710 05 True False version
@@ -16,11 +19,11 @@ Import Command:
     import contract ./demo/contracts/UtilContract.avm 0710 05 True False
 
 Example Invocation:
-    testinvoke 4f74c41ce60dcc8abb6f5b396935430f9d3b1db1 version
+    testinvoke 43ea62bef887fc821934d5d0b8fcd209b022933e version
 
 More Example Invokes:
-    testinvoke 4f74c41ce60dcc8abb6f5b396935430f9d3b1db1 is_owner
-    testinvoke 4f74c41ce60dcc8abb6f5b396935430f9d3b1db1 my_address
+    testinvoke 43ea62bef887fc821934d5d0b8fcd209b022933e is_owner
+    testinvoke 43ea62bef887fc821934d5d0b8fcd209b022933e height
 """
 from boa.blockchain.vm.System.ExecutionEngine import GetScriptContainer,GetExecutingScriptHash
 from boa.blockchain.vm.Neo.Transaction import *
@@ -67,6 +70,12 @@ def Main(operation: str, args: list) -> bytearray:
         elif operation == 'square':     # Returns square of a given value
             result = do_square(args)
             return result
+        elif operation == 'fibonacci':  # Returns Fibonacci value of a given number
+            result = do_fibonacci(args)
+            return result
+        elif operation == 'height':
+            result = do_height()
+            return result
         Log('unknown operation')
         return False
 
@@ -106,3 +115,31 @@ def do_square(args: list) -> int:
         return result
     Notify('invalid argument length')
     return False
+
+
+def do_fibonacci(args: list) -> int:
+    if len(args) > 0:
+        val = args[0]
+        result = get_fibonacci(val)
+        return result
+    Notify('invalid argument length')
+    return False
+
+
+def do_height() -> int:
+    current_height = GetHeight()
+    return current_height
+
+
+# -- Private methods
+
+
+def get_fibonacci(n: int) -> int:
+    if n == 1 or n == 2:
+        return 1
+    n1 = n - 1
+    n2 = n - 2
+    fibr1 = get_fibonacci(n1)
+    fibr2 = get_fibonacci(n2)
+    res = fibr1 + fibr2
+    return res
