@@ -1,4 +1,14 @@
 """
+TODO:
+- Add n numbers together
+- Get 2^n
+- Get Fibonacci
+- Get current block height
+- Get current transaction hash
+- Get invoker's address
+- Get attached asset details
+- Get string name of the type of input argument
+
 Test Command:
     build ./demo/contracts/UtilContract.py test 0710 05 True False version
 
@@ -45,11 +55,17 @@ def Main(operation: str, args: list) -> bytearray:
         if operation == 'version':
             result = do_version()
             return result
-        elif operation == 'is_owner':
+        elif operation == 'is_owner':   # Checking if invoker is the owner of the smart contract
             result = do_is_owner()
             return result
-        elif operation == 'my_address':
-            result = do_my_address()
+        elif operation == 'length':     # Get length of input arguments array
+            result = do_length(args)
+            return result
+        elif operation == 'add':        # Adding 2 numbers together
+            result = do_add(args)
+            return result
+        elif operation == 'square':     # Returns square of a given value
+            result = do_square(args)
             return result
         Log('unknown operation')
         return False
@@ -58,28 +74,35 @@ def Main(operation: str, args: list) -> bytearray:
     return False
 
 
-def do_version() -> bytearray:
+def do_version() -> int:
     version = VERSION
     Notify(version)
     return version
 
 
-def do_is_owner() -> bytearray:
+def do_is_owner() -> bool:
     return CheckWitness(OWNER)
 
 
-def do_my_address() -> bytearray:
-    # This is not working
-    tx = GetScriptContainer()
-    refs = tx.References
-    ref = refs[0]
-    Log('ref:')
-    Log(ref)
-    sentAsset = GetAssetId(ref)
-    Log('sentAsset:')
-    Log(sentAsset)
-    sender = GetScriptHash(ref)
-    Log('sender:')
-    Log(sender)
-    Notify('Not implemented.')
+def do_length(args: list) -> int:
+    result = len(args)
+    return result
+
+
+def do_add(args: list) -> int:
+    if len(args) > 1:
+        n1 = args[0]
+        n2 = args[1]
+        result = n1 + n2
+        return result
+    Notify('invalid argument length')
+    return False
+
+
+def do_square(args: list) -> int:
+    if len(args) > 0:
+        val = args[0]
+        result = val * val
+        return result
+    Notify('invalid argument length')
     return False
