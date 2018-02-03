@@ -24,6 +24,15 @@
 * Password: `1234567890`
 * Script hash: `b'\xd8\xa3[\x14L\xa8\xd3\xfa\x00\xad\x83T\xed\xd2\x87G\xfb_\xffJ'`
 
+## Development Notes
+
+### To know
+
+* How can I obtain invoker's wallet address, in byte array and string
+* Learn how to convert bytecode script hash into contract hash
+* Learn how to convert private key into wallet public key into wallet hash
+* Get random working, via different methods
+
 ## Developer References
 
 To see list of opcodes:
