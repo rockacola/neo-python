@@ -1,8 +1,5 @@
 """
 TODO:
-- Add n numbers together
-- Get 2^n
-- Get current block height
 - Get current transaction hash
 - Get invoker's address
 - Get attached asset details
@@ -69,8 +66,17 @@ def Main(operation: str, args: list) -> bytearray:
         elif operation == 'add':        # Adding 2 numbers together
             result = do_add(args)
             return result
+        elif operation == 'multiply':   # Multiply 2 numbers together
+            result = do_multiply(args)
+            return result
+        elif operation == 'add_array':  # Adding all numbers in array together
+            result = do_add_array(args)
+            return result
         elif operation == 'square':     # Returns square of a given value
             result = do_square(args)
+            return result
+        elif operation == 'power':       # Return base to the exponent power. Only support positive integers
+            result = do_power(args)
             return result
         elif operation == 'fibonacci':  # Returns Fibonacci value of a given number
             result = do_fibonacci(args)
@@ -110,10 +116,44 @@ def do_add(args: list) -> int:
     return False
 
 
+def do_multiply(args: list) -> int:
+    if len(args) > 1:
+        n1 = args[0]
+        n2 = args[1]
+        result = n1 * n2
+        return result
+    Notify('invalid argument length')
+    return False
+
+
+def do_add_array(args: list) -> int:
+    if len(args) > 1:
+        result = 0
+        for val in args:
+            result = result + val
+        return result
+    Notify('invalid argument length')
+    return False
+
+
 def do_square(args: list) -> int:
     if len(args) > 0:
         val = args[0]
         result = val * val
+        return result
+    Notify('invalid argument length')
+    return False
+
+
+def do_power(args: list) -> int:
+    if len(args) > 1:
+        input_base = args[0]
+        input_exp = args[1]
+        result = 1
+        index = 0
+        while index < input_exp:
+            result = result * input_base
+            index = index + 1
         return result
     Notify('invalid argument length')
     return False
