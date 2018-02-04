@@ -4,8 +4,6 @@ TODO:
 - Get invoker's address
 - Get attached asset details
 - Get string name of the type of input argument
-- Get string length
-- Get reverse of a string
 - Concate 2 strings together
 - Concate n strings together
 
@@ -17,12 +15,6 @@ Import Command:
 
 Example Invocation:
     testinvoke 43ea62bef887fc821934d5d0b8fcd209b022933e version
-    testinvoke 43ea62bef887fc821934d5d0b8fcd209b022933e is_owner
-    testinvoke 43ea62bef887fc821934d5d0b8fcd209b022933e length ['a','b',3,False,True]
-    testinvoke 43ea62bef887fc821934d5d0b8fcd209b022933e add [3,8]
-    testinvoke 43ea62bef887fc821934d5d0b8fcd209b022933e square [7]
-    testinvoke 43ea62bef887fc821934d5d0b8fcd209b022933e fibonacci [6]
-    testinvoke 43ea62bef887fc821934d5d0b8fcd209b022933e height
 """
 from boa.blockchain.vm.System.ExecutionEngine import GetScriptContainer, GetExecutingScriptHash
 from boa.blockchain.vm.Neo.Transaction import *
@@ -57,35 +49,41 @@ def Main(operation: str, args: list) -> bytearray:
         if operation == 'version':
             result = do_version()
             return result
-        elif operation == 'is_owner':   # Checking if invoker is the owner of the smart contract
+        elif operation == 'is_owner':       # Checking if invoker is the owner of the smart contract
             result = do_is_owner()
             return result
         # Number
-        elif operation == 'add':        # Adding 2 numbers together
+        elif operation == 'add':            # Adding 2 numbers together
             result = do_add(args)
             return result
-        elif operation == 'multiply':   # Multiply 2 numbers together
+        elif operation == 'multiply':       # Multiply 2 numbers together
             result = do_multiply(args)
             return result
-        elif operation == 'square':     # Returns square of a given value
+        elif operation == 'square':         # Returns square of a given value
             result = do_square(args)
             return result
-        elif operation == 'power':       # Return base to the exponent power. Only support positive integers
+        elif operation == 'power':          # Return base to the exponent power. Only support positive integers
             result = do_power(args)
             return result
-        elif operation == 'fibonacci':  # Returns Fibonacci value of a given number
+        elif operation == 'fibonacci':      # Returns Fibonacci value of a given number
             result = do_fibonacci(args)
             return result
         # String
+        elif operation == 'char_count':     # Return character count of input string
+            result = do_char_count(args)
+            return result
+        elif operation == 'string_reverse': # Return input string in reverse order
+            result = do_string_reverse(args)
+            return result
         # Array
-        elif operation == 'length':     # Get length of input arguments array
+        elif operation == 'length':         # Get length of input arguments array
             result = do_length(args)
             return result
-        elif operation == 'add_array':  # Adding all numbers in array together
+        elif operation == 'add_array':      # Adding all numbers in array together
             result = do_add_array(args)
             return result
         # Block
-        elif operation == 'height':
+        elif operation == 'height':         # Get current block height
             result = do_height()
             return result
         Log('unknown operation')
@@ -161,6 +159,30 @@ def do_fibonacci(args: list) -> int:
 
 
 # -- String
+
+
+def do_char_count(args: list) -> int:
+    if len(args) > 0:
+        val = args[0]
+        result = len(val)
+        return result
+    Notify('invalid argument length')
+    return False
+
+
+def do_string_reverse(args: list) -> str:
+    if len(args) > 0:
+        result = ''
+        val = args[0]
+        length = len(val)
+        index = 0
+        while index < length:
+            current_char = substr(val, index, 1)
+            result = concat(current_char, result)
+            index = index + 1
+        return result
+    Notify('invalid argument length')
+    return False
 
 
 # -- Array
