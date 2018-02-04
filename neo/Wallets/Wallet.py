@@ -743,10 +743,8 @@ class Wallet(object):
         Sets the current height to 0 and now `ProcessBlocks` will start from
         the beginning of the blockchain.
         """
-        print('[Wallet.Rebuild triggered]')
         self._coins = {}
         self._current_height = 0
-        print('[Wallet.Rebuild exits]')
 
     def OnProcessNewBlock(self, block, added, changed, deleted):
         # abstract

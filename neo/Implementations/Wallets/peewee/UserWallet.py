@@ -104,19 +104,15 @@ class UserWallet(Wallet):
         return self._db
 
     def Rebuild(self):
-        print('[UserWallet.Rebuild triggered]')
         super(UserWallet, self).Rebuild()
 
         for c in Coin.select():
-            print('[UserWallet.Rebuild delete a coin instance]')
             c.delete_instance()
         for tx in Transaction.select():
-            print('[UserWallet.Rebuild delete a TX instance]')
             tx.delete_instance()
 
         logger.debug("wallet rebuild: deleted coins and transactions %s %s " %
                      (Coin.select().count(), Transaction.select().count()))
-        print('[UserWallet.Rebuild exits]')
 
     def Close(self):
         if self._db:
