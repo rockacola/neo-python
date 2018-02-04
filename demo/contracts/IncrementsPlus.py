@@ -4,7 +4,7 @@ REF: https://medium.com/proof-of-working/how-to-build-an-ico-on-neo-with-the-nex
 """
 """
 Test Command:
-    build ./demo/contracts/IncrementsPlus.py test 0710 05 True False show
+    build ./demo/contracts/IncrementsPlus.py test 0710 05 True False version
 
 Test Response:
     Calling ./demo/contracts/IncrementsPlus.py with arguments ['show']
@@ -37,6 +37,8 @@ Example Response:
 from boa.blockchain.vm.Neo.Storage import Get, Put, Delete, GetContext
 from boa.blockchain.vm.Neo.Runtime import Notify
 
+# Global
+VERSION = 2
 
 def Main(operation, args):
     """
@@ -46,7 +48,9 @@ def Main(operation, args):
     :return:
         bytearray: The result of the operation
     """
-    if operation == 'reset':
+    if operation == 'version':
+        return do_version()
+    elif operation == 'reset':
         return do_reset()
     elif operation == 'show':
         return do_show()
@@ -58,6 +62,11 @@ def Main(operation, args):
         return do_decrease(args)
 
     return 'unknown operation'
+
+def do_version():
+    version = VERSION
+    Notify(version)
+    return version
 
 def get_counter():
     context = GetContext()
