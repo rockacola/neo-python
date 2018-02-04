@@ -24,20 +24,20 @@ Example Invocation:
     testinvoke 43ea62bef887fc821934d5d0b8fcd209b022933e fibonacci [6]
     testinvoke 43ea62bef887fc821934d5d0b8fcd209b022933e height
 """
-from boa.blockchain.vm.System.ExecutionEngine import GetScriptContainer,GetExecutingScriptHash
+from boa.blockchain.vm.System.ExecutionEngine import GetScriptContainer, GetExecutingScriptHash
 from boa.blockchain.vm.Neo.Transaction import *
 from boa.blockchain.vm.Neo.Runtime import Log, Notify, GetTrigger, CheckWitness
 from boa.blockchain.vm.Neo.Blockchain import GetHeight, GetHeader
 from boa.blockchain.vm.Neo.Action import RegisterAction
 from boa.blockchain.vm.Neo.TriggerType import Application, Verification
 from boa.blockchain.vm.Neo.Storage import GetContext, Get, Put, Delete
-from boa.blockchain.vm.Neo.Output import GetScriptHash,GetValue,GetAssetId
+from boa.blockchain.vm.Neo.Output import GetScriptHash, GetValue, GetAssetId
 from boa.code.builtins import concat, list, range, take, substr
 
 
 # Global
 VERSION = 1
-OWNER = b'#\xba\'\x03\xc52c\xe8\xd6\xe5"\xdc2 39\xdc\xd8\xee\xe9' # script hash for address: AK2nJJpJr6o664CWJKi1QRXjqeic2zRp8y
+OWNER = b'#\xba\'\x03\xc52c\xe8\xd6\xe5"\xdc2 39\xdc\xd8\xee\xe9'  # script hash for address: AK2nJJpJr6o664CWJKi1QRXjqeic2zRp8y
 # NEO_ASSET_ID = b'\x9b|\xff\xda\xa6t\xbe\xae\x0f\x93\x0e\xbe`\x85\xaf\x90\x93\xe5\xfeV\xb3J\\"\x0c\xcd\xcfn\xfc3o\xc5'
 # GAS_ASSET_ID = b'\xe7-(iy\xeel\xb1\xb7\xe6]\xfd\xdf\xb2\xe3\x84\x10\x0b\x8d\x14\x8ewX\xdeB\xe4\x16\x8bqy,`'
 
@@ -60,17 +60,12 @@ def Main(operation: str, args: list) -> bytearray:
         elif operation == 'is_owner':   # Checking if invoker is the owner of the smart contract
             result = do_is_owner()
             return result
-        elif operation == 'length':     # Get length of input arguments array
-            result = do_length(args)
-            return result
+        # Number
         elif operation == 'add':        # Adding 2 numbers together
             result = do_add(args)
             return result
         elif operation == 'multiply':   # Multiply 2 numbers together
             result = do_multiply(args)
-            return result
-        elif operation == 'add_array':  # Adding all numbers in array together
-            result = do_add_array(args)
             return result
         elif operation == 'square':     # Returns square of a given value
             result = do_square(args)
@@ -81,6 +76,15 @@ def Main(operation: str, args: list) -> bytearray:
         elif operation == 'fibonacci':  # Returns Fibonacci value of a given number
             result = do_fibonacci(args)
             return result
+        # String
+        # Array
+        elif operation == 'length':     # Get length of input arguments array
+            result = do_length(args)
+            return result
+        elif operation == 'add_array':  # Adding all numbers in array together
+            result = do_add_array(args)
+            return result
+        # Block
         elif operation == 'height':
             result = do_height()
             return result
@@ -101,9 +105,7 @@ def do_is_owner() -> bool:
     return CheckWitness(OWNER)
 
 
-def do_length(args: list) -> int:
-    result = len(args)
-    return result
+# -- Number
 
 
 def do_add(args: list) -> int:
@@ -121,16 +123,6 @@ def do_multiply(args: list) -> int:
         n1 = args[0]
         n2 = args[1]
         result = n1 * n2
-        return result
-    Notify('invalid argument length')
-    return False
-
-
-def do_add_array(args: list) -> int:
-    if len(args) > 1:
-        result = 0
-        for val in args:
-            result = result + val
         return result
     Notify('invalid argument length')
     return False
@@ -166,6 +158,30 @@ def do_fibonacci(args: list) -> int:
         return result
     Notify('invalid argument length')
     return False
+
+
+# -- String
+
+
+# -- Array
+
+
+def do_length(args: list) -> int:
+    result = len(args)
+    return result
+
+
+def do_add_array(args: list) -> int:
+    if len(args) > 1:
+        result = 0
+        for val in args:
+            result = result + val
+        return result
+    Notify('invalid argument length')
+    return False
+
+
+# -- Block
 
 
 def do_height() -> int:
