@@ -20,9 +20,11 @@ Import Command:
 
 Example Invocation:
     testinvoke 43ea62bef887fc821934d5d0b8fcd209b022933e version
-
-More Example Invokes:
     testinvoke 43ea62bef887fc821934d5d0b8fcd209b022933e is_owner
+    testinvoke 43ea62bef887fc821934d5d0b8fcd209b022933e length ['a','b',3,False,True]
+    testinvoke 43ea62bef887fc821934d5d0b8fcd209b022933e add [3,8]
+    testinvoke 43ea62bef887fc821934d5d0b8fcd209b022933e square [7]
+    testinvoke 43ea62bef887fc821934d5d0b8fcd209b022933e fibonacci [6]
     testinvoke 43ea62bef887fc821934d5d0b8fcd209b022933e height
 """
 from boa.blockchain.vm.System.ExecutionEngine import GetScriptContainer,GetExecutingScriptHash
