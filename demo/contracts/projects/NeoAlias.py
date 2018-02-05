@@ -6,7 +6,7 @@ Import Command:
     import contract ./demo/contracts/projects/NeoAlias.avm 0710 05 True False
 
 Example Invocation:
-    testinvoke 4f74c41ce60dcc8abb6f5b396935430f9d3b1db1 version
+    testinvoke ff8e5db265676e04262ee0d05c3f02fee97439bc version
 """
 from boa.blockchain.vm.System.ExecutionEngine import GetScriptContainer, GetExecutingScriptHash
 from boa.blockchain.vm.Neo.Transaction import *
@@ -20,7 +20,7 @@ from boa.code.builtins import concat, list, range, take, substr
 
 
 # Global
-VERSION = 7
+VERSION = 9
 OWNER = b'#\xba\'\x03\xc52c\xe8\xd6\xe5"\xdc2 39\xdc\xd8\xee\xe9' # script hash for address: AK2nJJpJr6o664CWJKi1QRXjqeic2zRp8y
 # NEO_ASSET_ID = b'\x9b|\xff\xda\xa6t\xbe\xae\x0f\x93\x0e\xbe`\x85\xaf\x90\x93\xe5\xfeV\xb3J\\"\x0c\xcd\xcfn\xfc3o\xc5'
 # GAS_ASSET_ID = b'\xe7-(iy\xeel\xb1\xb7\xe6]\xfd\xdf\xb2\xe3\x84\x10\x0b\x8d\x14\x8ewX\xdeB\xe4\x16\x8bqy,`'
@@ -69,7 +69,7 @@ def Main(operation: str, args: list) -> bytearray:
 
 
 def do_version() -> int:
-    version = VERSION
+    version = VERSION + 0
     Notify(version)
     return version
 
@@ -121,8 +121,6 @@ def do_get_alias(args: list) -> str:
 def get_alias_count(context, address: str) -> int:
     # TODO: validate address
     key = concat(address, '_count')
-    # Log('key:')
-    # Log(key)
     value = Get(context, key)
     value += 0  # trick value to always be an integer
     return value
@@ -141,8 +139,13 @@ def append_alias(context, address: str, new_alias: str) -> bool:
     index = count
     key = concat(address, '_')
     key = concat(key, index)    # So you get "{addr}_{index}" as key
+    Log('key:')
+    Log(key)
     Put(context, key, new_alias)
-    set_alias_count(context, address, index)
+    new_count = count + 1
+    Log('new_count:')
+    Log(new_count)
+    set_alias_count(context, address, new_count)
     return True
 
 
