@@ -4,8 +4,9 @@ TODO:
 - Get invoker's address
 - Get attached asset details
 - Get string name of the type of input argument
-- Concate 2 strings together
 - Concate n strings together
+- String replace
+- String indexOf
 
 Test Command:
     build ./demo/contracts/UtilContract.py test 0710 05 True False version
@@ -14,7 +15,7 @@ Import Command:
     import contract ./demo/contracts/UtilContract.avm 0710 05 True False
 
 Example Invocation:
-    testinvoke c9ccb3ee3019357f4769d067d7e4783d41504673 version
+    testinvoke 40a517e0e9798c6e5affec09228980e4bb0a3be8 version
 """
 from boa.blockchain.vm.System.ExecutionEngine import GetScriptContainer, GetExecutingScriptHash
 from boa.blockchain.vm.Neo.Transaction import *
@@ -28,7 +29,7 @@ from boa.code.builtins import concat, list, range, take, substr
 
 
 # Global
-VERSION = 2
+VERSION = 3
 OWNER = b'#\xba\'\x03\xc52c\xe8\xd6\xe5"\xdc2 39\xdc\xd8\xee\xe9'  # script hash for address: AK2nJJpJr6o664CWJKi1QRXjqeic2zRp8y
 # NEO_ASSET_ID = b'\x9b|\xff\xda\xa6t\xbe\xae\x0f\x93\x0e\xbe`\x85\xaf\x90\x93\xe5\xfeV\xb3J\\"\x0c\xcd\xcfn\xfc3o\xc5'
 # GAS_ASSET_ID = b'\xe7-(iy\xeel\xb1\xb7\xe6]\xfd\xdf\xb2\xe3\x84\x10\x0b\x8d\x14\x8ewX\xdeB\xe4\x16\x8bqy,`'
