@@ -47,6 +47,7 @@ def Main(operation: str, args: list) -> bytearray:
         elif operation == 'is_owner':       # Checking if invoker is the owner of the smart contract
             result = do_is_owner()
             return result
+
         # Standard
         elif operation == 'count_alias':    # Count numbers of alias assigned to the specified address
             result = do_count_alias(args)
@@ -55,8 +56,27 @@ def Main(operation: str, args: list) -> bytearray:
             result = do_set_alias(args)
             return result
         elif operation == 'get_alias':      # Fetch alias name to the specified address of a specified index
+            # TODO: need to extend this so instead of results in a string, it should returns an array/object with alias name and vote count
             result = do_get_alias(args)
             return result
+        elif operation == 'get_aliases':
+            # TODO: need to extend this so instead of results in a string array, it should returns an array of array/object with alias name and vote count
+            result = do_get_aliases(args)
+            return result
+        # TODO: vote_alias(address: str, point: int)
+        # TODO: list_all_aliases()
+
+        # Moderation
+        # TODO: mark_bad_address(address, str)
+        # TODO: unmark_bad_address(address, str)
+        # TODO: mark_bad_alias(address, str, index: int)
+        # TODO: unmark_bad_alias(address, str, index: int)
+
+        # Access control
+        # TODO: assign_mod(address: str)
+        # TODO: resign_mod(address: str)
+        # TODO: assign_admin(address: str)
+        # TODO: resign_admin(address: str)
 
         Log('unknown operation')
         return False
@@ -100,6 +120,7 @@ def do_set_alias(args: list) -> bool:
         address = args[0]
         new_alias = args[1]
         result = append_alias(context, address, new_alias)
+        # TODO: keep count and store in a 'all_*' key
         return result
     Notify('invalid argument length')
     return False
@@ -114,6 +135,17 @@ def do_get_alias(args: list) -> str:
         return result
     Notify('invalid argument length')
     return False
+
+
+def do_get_aliases(args: list) -> list:
+    if len(args) > 0:
+        context = GetContext()
+        address = args[0]
+        result = get_aliases(context, address)
+        return result
+    Notify('invalid argument length')
+    return False
+
 
 # -- Concrete methods
 
@@ -158,4 +190,17 @@ def get_alias(context, address: str, index: int) -> str:
     return alias
 
 
+def get_aliases(context, address: str) -> list:
+    # NOTE: Untested code
+    count = get_alias_count(context, address)
+    i = 0
+    alias_list = []
+    while (i < count):
+        alias = get_alias(context, address, i)
+        alias_list.append(alias)
+        i = i + 1
+    return alias_list
+
+
 # -- Helper methods
+
