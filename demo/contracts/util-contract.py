@@ -7,9 +7,10 @@ TODO:
 - Concate n strings together
 - String replace
 - String indexOf
-- Set key-value into context
+- Set key-value into context (test non-ASCII characters, and crazy length)
 - Get key-value from context
 - Check if a key exists in context
+- Array storage example (pop, push, fetch, count)
 
 Test Command:
     build ./demo/contracts/util-contract.py test 0710 05 True False version
