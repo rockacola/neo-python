@@ -1,9 +1,9 @@
 """
 Test Command:
-    build ./demo/contracts/projects/NeoAlias.py test 0710 05 True False version
+    build ./demo/contracts/projects/neo-alias.py test 0710 05 True False version
 
 Import Command:
-    import contract ./demo/contracts/projects/NeoAlias.avm 0710 05 True False
+    import contract ./demo/contracts/projects/neo-alias.avm 0710 05 True False
 
 Example Invocation:
     testinvoke ff8e5db265676e04262ee0d05c3f02fee97439bc version

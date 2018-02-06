@@ -7,12 +7,15 @@ TODO:
 - Concate n strings together
 - String replace
 - String indexOf
+- Set key-value into context
+- Get key-value from context
+- Check if a key exists in context
 
 Test Command:
-    build ./demo/contracts/UtilContract.py test 0710 05 True False version
+    build ./demo/contracts/util-contract.py test 0710 05 True False version
 
 Import Command:
-    import contract ./demo/contracts/UtilContract.avm 0710 05 True False
+    import contract ./demo/contracts/util-contract.avm 0710 05 True False
 
 Example Invocation:
     testinvoke e5551964312eff43cf15af057ff3aae4d4b8bfc9 version
