@@ -160,9 +160,7 @@ def do_get_alias_score(args: list) -> int:
         address = args[0]
         index = args[1]  # TODO: validate input
         # Prepare key
-        key = concat(address, '_')
-        key = concat(key, index)
-        key = concat(key, '_score')
+        key = prepare_score_key(address, index)
         Log('key:')
         Log(key)
         score = get_alias_score(context, key)
@@ -246,7 +244,7 @@ def do_set_storage(args: list) -> bytearray:
 def get_alias_count(context, address: str) -> int:
     # TODO: validate address
     Log('get_alias_count triggered.')
-    key = concat(address, '_count')
+    key = prepare_count_key(address)
     Log('key:')
     Log(key)
     value = Get(context, key)
@@ -261,7 +259,7 @@ def get_alias_count(context, address: str) -> int:
 
 
 def set_alias_count(context, address: str, count: int) -> bool:
-    key = concat(address, '_count')
+    key = prepare_count_key(address)
     Put(context, key, count)
     return True
 
@@ -279,8 +277,7 @@ def append_alias(context, address: str, new_alias: str) -> bool:
     index = get_alias_count(context, address)
     Log('index:')
     Log(index)
-    key = concat(address, '_')
-    key = concat(key, index)    # So you get "{addr}_{index}" as key
+    key = prepare_alias_key(address, index)
     Log('key:')
     Log(key)
     Put(context, key, new_alias)
@@ -297,8 +294,7 @@ def append_alias(context, address: str, new_alias: str) -> bool:
 
 
 def get_alias(context, address: str, index: int) -> str:
-    key = concat(address, '_')
-    key = concat(key, index)    # So you get "{addr}_{index}" as key
+    key = prepare_alias_key(address, index)
     alias = Get(context, key)
     Log('alias:')
     Log(alias)
@@ -320,9 +316,7 @@ def get_aliases(context, address: str) -> list:
 def vote_alias(context, address: str, index: int, point: int) -> int:
     Log('vote_alias triggered.')
     # Get stored score for this alias
-    key = concat(address, '_')
-    key = concat(key, index)
-    key = concat(key, '_score')
+    key = prepare_score_key(address, index)
     Log('key:')
     Log(key)
     existing_score = get_alias_score(context, key)
@@ -353,7 +347,7 @@ def get_all_count(context) -> int:
 
 
 def set_all_alias(context, index: int, value: str) -> bool:
-    key = concat('all_', index)
+    key = prepare_alias_key('all', index)
     Put(context, key, value)
     return True
 
@@ -363,3 +357,20 @@ def increment_all_count(context, existing_count: int) -> bool:
 
 
 # -- Helper methods
+
+def prepare_count_key(address: str) -> str:
+    key = concat(address, '_count')
+    return key
+
+
+def prepare_alias_key(address: str, index: int) -> str:
+    key = concat(address, '_')
+    key = concat(key, index)
+    return key
+
+
+def prepare_score_key(address: str, index: int) -> str:
+    key = concat(address, '_')
+    key = concat(key, index)
+    key = concat(key, '_score')
+    return key
