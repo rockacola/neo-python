@@ -64,13 +64,15 @@ def Main(operation: str, args: list) -> bytearray:
             # TODO: need to extend this so instead of results in a string array, it should returns an array of array/object with alias name and vote count
             result = do_get_aliases(args)
             return result
-        # TODO: vote_alias(address: str, point: int)
-        # TODO: list_all_aliases()
+        elif operation == 'vote_alias':     # Cast your vote to the specified address of a specified index, and return with current score
+            result = do_vote_alias(args)
+            return result
 
         # Stats
         elif operation == 'count_all':      # Count total alias assigned
             result = do_count_all_aliases()
             return result
+
         # Moderation
         # TODO: mark_bad_address(address, str)
         # TODO: unmark_bad_address(address, str)
@@ -143,7 +145,7 @@ def do_get_alias(args: list) -> str:
     if len(args) > 1:
         context = GetContext()
         address = args[0]
-        index = args[1]
+        index = args[1]  # TODO: validate input
         result = get_alias(context, address, index)
         return result
     Notify('invalid argument length')
@@ -156,6 +158,27 @@ def do_get_aliases(args: list) -> list:
         address = args[0]
         result = get_aliases(context, address)
         return result
+    Notify('invalid argument length')
+    return False
+
+
+def do_vote_alias(args: list) -> int:
+    # TODO: be conscious about vote caster, keep track of vote log and perform ACL check
+    if len(args) > 2:
+        context = GetContext()
+        address = args[0]
+        index = args[1]
+        point = args[2]
+        count = get_alias_count(context, address)
+        if (index < 0 or index >= count):  # Validate target index
+            Notify('Invalid index value provided')
+            return False
+        if point != 1 and point != -1:  # Validate vote point value
+            Notify('Invalid vote point provided')
+            return False
+        else:
+            result = vote_alias(context, address, index, point)
+            return result
     Notify('invalid argument length')
     return False
 
@@ -273,6 +296,36 @@ def get_aliases(context, address: str) -> list:
         alias_list.append(alias)
         i = i + 1
     return alias_list
+
+
+def vote_alias(context, address: str, index: int, point: int) -> int:
+    Log('vote_alias triggered.')
+    # Get stored score for this alias
+    key = concat(address, '_')
+    key = concat(key, index)
+    key = concat(key, '_score')
+    Log('key:')
+    Log(key)
+    existing_score = get_alias_score(context, key)
+    Log('existing_score:')
+    Log(existing_score)
+    # Update value
+    new_score = existing_score + point
+    Log('new_score:')
+    Log(new_score)
+    # Store new score
+    Put(context, key, new_score)
+    # return updated value
+    return new_score
+
+
+def get_alias_score(context, key: str) -> int:
+    Log('get_alias_score triggered.')
+    value = Get(context, key)
+    if value == None:
+        Log('oh, value detected to be None.')
+        value = 0
+    return value
 
 
 def get_all_count(context) -> int:
