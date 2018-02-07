@@ -22,12 +22,9 @@ from boa.code.builtins import concat, list, range, take, substr
 
 # Global
 VERSION = 10
-OWNER = b'#\xba\'\x03\xc52c\xe8\xd6\xe5"\xdc2 39\xdc\xd8\xee\xe9' # script hash for address: AK2nJJpJr6o664CWJKi1QRXjqeic2zRp8y
+OWNER = b'#\xba\'\x03\xc52c\xe8\xd6\xe5"\xdc2 39\xdc\xd8\xee\xe9'  # script hash for address: AK2nJJpJr6o664CWJKi1QRXjqeic2zRp8y
 # NEO_ASSET_ID = b'\x9b|\xff\xda\xa6t\xbe\xae\x0f\x93\x0e\xbe`\x85\xaf\x90\x93\xe5\xfeV\xb3J\\"\x0c\xcd\xcfn\xfc3o\xc5'
 # GAS_ASSET_ID = b'\xe7-(iy\xeel\xb1\xb7\xe6]\xfd\xdf\xb2\xe3\x84\x10\x0b\x8d\x14\x8ewX\xdeB\xe4\x16\x8bqy,`'
-
-
-
 
 
 def Main(operation: str, args: list) -> bytearray:
@@ -159,11 +156,7 @@ def do_get_alias_score(args: list) -> int:
         context = GetContext()
         address = args[0]
         index = args[1]  # TODO: validate input
-        # Prepare key
-        key = prepare_score_key(address, index)
-        Log('key:')
-        Log(key)
-        score = get_alias_score(context, key)
+        score = get_alias_score(context, address, index)
         return score
     Notify('invalid argument length')
     return False
@@ -248,7 +241,7 @@ def get_alias_count(context, address: str) -> int:
     Log('key:')
     Log(key)
     value = Get(context, key)
-    if value == None:
+    if value == None:  # Must use ==. use 'is' provides false negative
         Log('oh, value detected to be None.')
         value = 0
     else:
@@ -316,10 +309,7 @@ def get_aliases(context, address: str) -> list:
 def vote_alias(context, address: str, index: int, point: int) -> int:
     Log('vote_alias triggered.')
     # Get stored score for this alias
-    key = prepare_score_key(address, index)
-    Log('key:')
-    Log(key)
-    existing_score = get_alias_score(context, key)
+    existing_score = get_alias_score(context, address, index)
     Log('existing_score:')
     Log(existing_score)
     # Update value
@@ -327,18 +317,24 @@ def vote_alias(context, address: str, index: int, point: int) -> int:
     Log('new_score:')
     Log(new_score)
     # Store new score
-    Put(context, key, new_score)
-    # return updated value
+    set_alias_score(context, address, index, new_score)
     return new_score
 
 
-def get_alias_score(context, key: str) -> int:
+def get_alias_score(context, address: str, index: int) -> int:
     Log('get_alias_score triggered.')
+    key = prepare_score_key(address, index)
     value = Get(context, key)
     if value == None:
         Log('oh, value detected to be None.')
         value = 0
     return value
+
+
+def set_alias_score(context, address: str, index: int, score: int) -> bool:
+    key = prepare_score_key(address, index)
+    Put(context, key, score)
+    return True
 
 
 def get_all_count(context) -> int:
@@ -353,10 +349,12 @@ def set_all_alias(context, index: int, value: str) -> bool:
 
 
 def increment_all_count(context, existing_count: int) -> bool:
-    return increment_alias_count(context, 'all', existing_count)
+    result = increment_alias_count(context, 'all', existing_count)
+    return result
 
 
 # -- Helper methods
+
 
 def prepare_count_key(address: str) -> str:
     key = concat(address, '_count')
