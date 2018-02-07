@@ -7,7 +7,7 @@ Import Command:
     import contract ./demo/contracts/projects/neo-alias.avm 0710 05 True False
 
 Example Invocation:
-    testinvoke ff8e5db265676e04262ee0d05c3f02fee97439bc version
+    testinvoke d25fa44cbed195c9f200ff74fec9630005fa27b8 version
 """
 from boa.blockchain.vm.System.ExecutionEngine import GetScriptContainer, GetExecutingScriptHash
 from boa.blockchain.vm.Neo.Transaction import *
