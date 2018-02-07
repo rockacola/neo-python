@@ -15,13 +15,16 @@ TODO:
 
 Test Command:
     build ./demo/contracts/util-contract.py test 0710 05 True False version
+    build ./demo/contracts/util-contract.py test 0710 05 True False my_address --attach-gas=1
+    build ./demo/contracts/util-contract.py test 0710 05 True False is_address ['AK2nJJpJr6o664CWJKi1QRXjqeic2zRp8y'] --attach-gas=1
 
 Import Command:
     import contract ./demo/contracts/util-contract.avm 0710 05 True False
 
 Example Invocation:
-    testinvoke 829af3dc8988ba9a15ad20d1d83d1f1bd61f004e version
-    testinvoke 829af3dc8988ba9a15ad20d1d83d1f1bd61f004e my_address [] --attach-gas=1
+    testinvoke 565e6b82ef1afc7c452dbb651146ff11f93a3191 version
+    testinvoke 565e6b82ef1afc7c452dbb651146ff11f93a3191 my_address [] --attach-gas=1 # Output: b'#\xba\'\x03\xc52c\xe8\xd6\xe5"\xdc2 39\xdc\xd8\xee\xe9'
+    testinvoke 565e6b82ef1afc7c452dbb651146ff11f93a3191 is_address ['AK2nJJpJr6o664CWJKi1QRXjqeic2zRp8y'] --attach-gas=1
 """
 from boa.blockchain.vm.System.ExecutionEngine import GetScriptContainer, GetExecutingScriptHash
 from boa.blockchain.vm.Neo.Transaction import *
@@ -35,7 +38,7 @@ from boa.code.builtins import concat, list, range, take, substr
 
 
 # Global
-VERSION = 4
+VERSION = 6
 OWNER = b'#\xba\'\x03\xc52c\xe8\xd6\xe5"\xdc2 39\xdc\xd8\xee\xe9'  # script hash for address: AK2nJJpJr6o664CWJKi1QRXjqeic2zRp8y
 # NEO_ASSET_ID = b'\x9b|\xff\xda\xa6t\xbe\xae\x0f\x93\x0e\xbe`\x85\xaf\x90\x93\xe5\xfeV\xb3J\\"\x0c\xcd\xcfn\xfc3o\xc5'
 # GAS_ASSET_ID = b'\xe7-(iy\xeel\xb1\xb7\xe6]\xfd\xdf\xb2\xe3\x84\x10\x0b\x8d\x14\x8ewX\xdeB\xe4\x16\x8bqy,`'
@@ -89,7 +92,6 @@ def Main(operation: str, args: list) -> bytearray:
         elif operation == 'add_array':      # Adding all numbers in array together
             result = do_add_array(args)
             return result
-        # Casting
         # Block
         elif operation == 'height':         # Get current block height
             result = do_height()
@@ -97,6 +99,9 @@ def Main(operation: str, args: list) -> bytearray:
         # Account
         elif operation == 'my_address':     # Get invoker's wallet address
             result = do_my_address()
+            return result
+        elif operation == 'is_address':      # Check if invoker's address matches the specified address
+            result = do_is_address(args)
             return result
 
         Log('unknown operation')
@@ -229,24 +234,28 @@ def do_height() -> int:
 
 def do_my_address() -> bytearray:
     Log('do_my_address triggered.')
-    tx = GetScriptContainer()
-    Log('tx:')
-    Log(tx)
-    # TODO: tx None check
-    references = tx.References
-    Log('references:')
-    Log(references)
-    # TODO: references None and length check
-    receiver_addr = GetExecutingScriptHash()
-    Log('receiver_addr:')
-    Log(receiver_addr)
-    reference = references[0]
-    Log('reference:')
-    Log(reference)
-    sender_addr = reference.ScriptHash
+    sender_addr = get_my_address()
     Log('sender_addr:')
     Log(sender_addr)
     return sender_addr
+
+
+def do_is_address(args: list) -> bool:
+    if len(args) > 0:
+        Log('do_is_address triggered.')
+        target_address = args[0]
+        Log('target_address:')
+        Log(target_address)
+        target_address_length = len(target_address)
+        Log('target_address_length:')
+        Log(target_address_length)
+        sender_address = get_my_address()
+        Log('sender_address:')
+        Log(sender_address)
+        result = (target_address == sender_address)
+        return result
+    Notify('invalid argument length')
+    return False
 
 
 # -- Private methods
@@ -261,3 +270,24 @@ def get_fibonacci(n: int) -> int:
     fibr2 = get_fibonacci(n2)
     res = fibr1 + fibr2
     return res
+
+def get_my_address() -> bytearray:
+    # Log('get_my_address triggered.')
+    tx = GetScriptContainer()
+    # Log('tx:')
+    # Log(tx)
+    # TODO: tx None check
+    references = tx.References
+    # Log('references:')
+    # Log(references)
+    # TODO: references None and length check
+    # receiver_addr = GetExecutingScriptHash()
+    # Log('receiver_addr:')
+    # Log(receiver_addr)
+    reference = references[0]
+    # Log('reference:')
+    # Log(reference)
+    sender_addr = reference.ScriptHash
+    # Log('sender_addr:')
+    # Log(sender_addr)
+    return sender_addr
