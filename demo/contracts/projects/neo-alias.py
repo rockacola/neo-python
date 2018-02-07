@@ -57,10 +57,12 @@ def Main(operation: str, args: list) -> bytearray:
             result = do_set_alias(args)
             return result
         elif operation == 'get_alias':      # Fetch alias name to the specified address of a specified index
-            # TODO: need to extend this so instead of results in a string, it should returns an array/object with alias name and vote count
             result = do_get_alias(args)
             return result
-        elif operation == 'get_aliases':    # Fetch all aliases to the specified address
+        elif operation == 'get_alias_score':  # Fetch score value of the specified address of a specified index
+            result = do_get_alias_score(args)
+            return result
+        elif operation == 'get_aliases':    # Fetch all aliases to the specified address # TODO: consider deprecating this to simplify the contract
             # TODO: need to extend this so instead of results in a string array, it should returns an array of array/object with alias name and vote count
             result = do_get_aliases(args)
             return result
@@ -148,6 +150,23 @@ def do_get_alias(args: list) -> str:
         index = args[1]  # TODO: validate input
         result = get_alias(context, address, index)
         return result
+    Notify('invalid argument length')
+    return False
+
+
+def do_get_alias_score(args: list) -> int:
+    if len(args) > 1:
+        context = GetContext()
+        address = args[0]
+        index = args[1]  # TODO: validate input
+        # Prepare key
+        key = concat(address, '_')
+        key = concat(key, index)
+        key = concat(key, '_score')
+        Log('key:')
+        Log(key)
+        score = get_alias_score(context, key)
+        return score
     Notify('invalid argument length')
     return False
 
