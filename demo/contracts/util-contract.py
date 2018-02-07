@@ -4,6 +4,7 @@ TODO:
 - Get invoker's address
 - Get attached asset details
 - Get string name of the type of input argument
+- Concate 2 values of any datatype together
 - Concate n strings together
 - String replace
 - String indexOf

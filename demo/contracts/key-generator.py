@@ -7,6 +7,7 @@ Import Command:
 
 Example Invocation:
     testinvoke 160c4f042e442266df8376082ab40b7c71c5e186 version
+    testinvoke 160c4f042e442266df8376082ab40b7c71c5e186 keygen ['prefix_',2]
 
 URL: https://pastebin.com/vfWFcBBT
 """
