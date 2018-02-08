@@ -17,6 +17,7 @@ Test Command:
     build ./demo/contracts/util-contract.py test 0710 05 True False version
     build ./demo/contracts/util-contract.py test 0710 05 True False my_address --attach-gas=1
     build ./demo/contracts/util-contract.py test 0710 05 True False is_address ['AK2nJJpJr6o664CWJKi1QRXjqeic2zRp8y'] --attach-gas=1
+    build ./demo/contracts/util-contract.py test 0710 05 True False is_witness_address ['AK2nJJpJr6o664CWJKi1QRXjqeic2zRp8y']
 
 Import Command:
     import contract ./demo/contracts/util-contract.avm 0710 05 True False
@@ -102,6 +103,9 @@ def Main(operation: str, args: list) -> bytearray:
             return result
         elif operation == 'is_address':      # Check if invoker's address matches the specified address
             result = do_is_address(args)
+            return result
+        elif operation == 'is_witness_address':      # Check if invoker's address matches the specified address
+            result = do_is_witness_address(args)
             return result
 
         Log('unknown operation')
@@ -252,9 +256,24 @@ def do_is_address(args: list) -> bool:
         sender_address = get_my_address()
         Log('sender_address:')
         Log(sender_address)
-        # TODO: Perhaps I can use CheckWitness() instead of compare operator?
         result = (target_address == sender_address)
+        Log('result:')
+        Log(result)
         return result
+    Notify('invalid argument length')
+    return False
+
+
+def do_is_witness_address(args: list) -> bool:
+    if len(args) > 0:
+        Log('do_is_witness_address triggered.')
+        target_address = args[0]
+        Log('target_address:')
+        Log(target_address)
+        is_match = CheckWitness(target_address)
+        Log('is_match:')
+        Log(is_match)
+        return is_match
     Notify('invalid argument length')
     return False
 
@@ -271,6 +290,7 @@ def get_fibonacci(n: int) -> int:
     fibr2 = get_fibonacci(n2)
     res = fibr1 + fibr2
     return res
+
 
 def get_my_address() -> bytearray:
     # Log('get_my_address triggered.')
