@@ -35,9 +35,6 @@ from boa.blockchain.vm.Neo.TriggerType import Application, Verification
 from boa.blockchain.vm.Neo.Storage import GetContext, Get, Put, Delete
 from boa.blockchain.vm.Neo.Output import GetScriptHash, GetValue, GetAssetId
 from boa.code.builtins import concat, list, range, take, substr
-# import binascii
-# from neocore.UInt160 import UInt160
-# from neocore.Cryptography.Crypto import Crypto
 
 
 # Global
@@ -102,9 +99,6 @@ def Main(operation: str, args: list) -> bytearray:
         # Account
         elif operation == 'my_address':     # Get invoker's wallet address in bytearray
             result = do_my_address()
-            return result
-        elif operation == 'my_address_string':  # Get invoker's wallet address in string
-            result = do_my_address_string()
             return result
         elif operation == 'is_address':      # Check if invoker's address matches the specified address
             result = do_is_address(args)
@@ -244,16 +238,6 @@ def do_my_address() -> bytearray:
     Log('sender_addr:')
     Log(sender_addr)
     return sender_addr
-
-
-def do_my_address_string() -> str:
-    # Log('do_my_address_string triggered.')
-    # sender_addr = get_my_address()
-    # Log('sender_addr:')
-    # Log(sender_addr)
-    script_hash = UInt160(data=sender_addr)
-    address_string = Crypto.ToAddress(script_hash) # 'AVjJDaboEFxL5GHjLoGxB7zsvaRbe1kyZf'
-    return address_string
 
 
 def do_is_address(args: list) -> bool:
