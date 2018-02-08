@@ -8,6 +8,15 @@ Import Command:
 
 Example Invocation:
     testinvoke d25fa44cbed195c9f200ff74fec9630005fa27b8 version
+
+TODO:
+    - record each vote
+    - validate input address
+    - get_safe_str
+    _ get_safe_int
+
+Performance TODO:
+    - tweak structure in a way, where truthy operations should be the shortest path
 """
 from boa.blockchain.vm.System.ExecutionEngine import GetScriptContainer, GetExecutingScriptHash
 from boa.blockchain.vm.Neo.Transaction import *
@@ -178,12 +187,18 @@ def do_vote_alias(args: list) -> int:
         context = GetContext()
         address = args[0]
         index = args[1]
+        Log('index:')
+        Log(index)
         point = args[2]
         count = get_alias_count(context, address)
+        Log('count:')
+        Log(count)
         if (index < 0 or index >= count):  # Validate target index
             Notify('Invalid index value provided')
             return False
-        if point != 1 and point != -1:  # Validate vote point value
+
+        is_valid = is_valid_vote(address, point)
+        if not is_valid:
             Notify('Invalid vote point provided')
             return False
         else:
@@ -351,6 +366,13 @@ def set_all_alias(context, index: int, value: str) -> bool:
 def increment_all_count(context, existing_count: int) -> bool:
     result = increment_alias_count(context, 'all', existing_count)
     return result
+
+
+def is_valid_vote(address: str, point: int) -> bool:
+    Log('is_valid_vote triggered.')
+    if point == 1 or point == -1:
+        return True
+    return False
 
 
 # -- Helper methods
