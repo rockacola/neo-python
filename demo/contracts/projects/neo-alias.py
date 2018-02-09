@@ -143,11 +143,17 @@ def do_count_alias(args: list) -> int:
 
 def do_set_alias(args: list) -> bool:
     if len(args) > 0:
-        context = GetContext()
         address = args[0]
         new_alias = args[1]
-        result = append_alias(context, address, new_alias)
-        return result
+        is_valid_ad = is_valid_address(address)
+        is_valid_al = is_valid_alias(new_alias)
+        if is_valid_ad and is_valid_al:
+            context = GetContext()
+            result = append_alias(context, address, new_alias)
+            return result
+        else:
+            Notify('invlid input address or alias')
+            return False
     Notify('invalid argument length')
     return False
 
@@ -255,15 +261,16 @@ def do_set_storage(args: list) -> bytearray:
 
 
 def get_alias_count(context, address: str) -> int:
-    Log('get_alias_count triggered.')
+    # Log('get_alias_count triggered.')
     key = prepare_count_key(address)
-    Log('key:')
-    Log(key)
+    # Log('key:')
+    # Log(key)
     value = Get(context, key)
     if value == None:  # Must use ==. use 'is' provides false negative
         Log('Value detected to be None, return zero instead')
         return 0
     else:
+        value = value + 0  # trick bytearray into bytes/int
         return value
 
 
@@ -275,13 +282,13 @@ def set_alias_count(context, address: str, count: int) -> bool:
 
 def increment_alias_count(context, address: str, existing_count: int) -> bool:
     new_count = existing_count + 1
-    return set_alias_count(context, address, new_count)
+    is_success = set_alias_count(context, address, new_count)
+    return is_success
 
 
 def append_alias(context, address: str, new_alias: str) -> bool:
-    # TODO: validate address
-    # TODO: validate alias
-    # TODO: keep count and store in a 'all_*' key
+    # TODO: get invokers address
+    # TODO: verify if this is the first time invoker assigning alias to target address
     Log('append_alias triggered.')
     index = get_alias_count(context, address)
     Log('index:')
@@ -297,8 +304,11 @@ def append_alias(context, address: str, new_alias: str) -> bool:
     set_alias_count(context, address, new_count)
     # Keep track of all records
     all_index = get_all_count(context)
+    Log('all_index:')
+    Log(all_index)
     set_all_alias(context, all_index, key)  # Store alias key as value for all records
     increment_all_count(context, all_index)
+    # TODO: log invoker's address assignment
     return True
 
 
@@ -354,17 +364,22 @@ def set_alias_score(context, address: str, index: int, score: int) -> bool:
 
 
 def get_all_count(context) -> int:
-    result = get_alias_count(context, 'all')
-    return result
+    Log('get_all_count triggered')
+    count = get_alias_count(context, 'all')
+    Log('count:')
+    Log(count)
+    return count
 
 
 def set_all_alias(context, index: int, value: str) -> bool:
+    Log('set_all_alias triggered')
     key = prepare_alias_key('all', index)
     Put(context, key, value)
     return True
 
 
 def increment_all_count(context, existing_count: int) -> bool:
+    Log('increment_all_count triggered')
     result = increment_alias_count(context, 'all', existing_count)
     return result
 
@@ -385,7 +400,10 @@ def prepare_count_key(address: str) -> str:
 
 
 def prepare_alias_key(address: str, index: int) -> str:
-    key = concat(address, '_')
+    # key = concat(address, '_')
+    # key = concat(key, index)
+    key = concat('w_', address)
+    key = concat(key, '_')
     key = concat(key, index)
     return key
 
@@ -404,4 +422,9 @@ def is_valid_address(address: str) -> bool:
     - TypeError: object of type 'UInt160' has no len()
     '''
     length = len(address)
+    return True
+
+
+def is_valid_alias(alias: str) -> bool:
+    # Currently it's just a placeholder
     return True
