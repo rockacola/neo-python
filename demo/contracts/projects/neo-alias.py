@@ -11,10 +11,9 @@ Example Invocation:
 
 TODO:
     - record each vote
-    - validate input address
     - get_safe_str
-    _ get_safe_int
-
+    - get_safe_int
+    - explore the idea of output status code (eg/ 'BAD_AUTH') to provide better diagnostic hints
 Performance TODO:
     - tweak structure in a way, where truthy operations should be the shortest path
 """
@@ -34,6 +33,9 @@ VERSION = 10
 OWNER = b'#\xba\'\x03\xc52c\xe8\xd6\xe5"\xdc2 39\xdc\xd8\xee\xe9'  # script hash for address: AK2nJJpJr6o664CWJKi1QRXjqeic2zRp8y
 # NEO_ASSET_ID = b'\x9b|\xff\xda\xa6t\xbe\xae\x0f\x93\x0e\xbe`\x85\xaf\x90\x93\xe5\xfeV\xb3J\\"\x0c\xcd\xcfn\xfc3o\xc5'
 # GAS_ASSET_ID = b'\xe7-(iy\xeel\xb1\xb7\xe6]\xfd\xdf\xb2\xe3\x84\x10\x0b\x8d\x14\x8ewX\xdeB\xe4\x16\x8bqy,`'
+
+
+# -- Chain of command
 
 
 def Main(operation: str, args: list) -> bytearray:
@@ -69,7 +71,6 @@ def Main(operation: str, args: list) -> bytearray:
             result = do_get_alias_score(args)
             return result
         elif operation == 'get_aliases':    # Fetch all aliases to the specified address # TODO: consider deprecating this to simplify the contract
-            # TODO: need to extend this so instead of results in a string array, it should returns an array of array/object with alias name and vote count
             result = do_get_aliases(args)
             return result
         elif operation == 'vote_alias':     # Cast your vote to the specified address of a specified index, and return with current score
@@ -93,7 +94,7 @@ def Main(operation: str, args: list) -> bytearray:
         # TODO: assign_admin(address: str)
         # TODO: resign_admin(address: str)
 
-        # Utilities
+        # Admin Utilities
         elif operation == 'get_storage':
             result = do_get_storage(args)
             return result
@@ -108,11 +109,11 @@ def Main(operation: str, args: list) -> bytearray:
     return False
 
 
-# -- Profile operations
+# -- Operation delegator with input validation
 
 
 def do_version() -> int:
-    version = VERSION + 0
+    version = VERSION
     Log('version:')
     Log(version)
     return version
@@ -122,18 +123,20 @@ def do_is_owner() -> bool:
     return CheckWitness(OWNER)
 
 
-# -- Standard operations
-
-
 def do_count_alias(args: list) -> int:
-    # Log('do_count_alias triggered.')
-    # Log('args:')
-    # Log(args)
+    Log('do_count_alias triggered')
     if len(args) > 0:
-        context = GetContext()
         address = args[0]
-        result = get_alias_count(context, address)
-        return result
+        Log('address:')
+        Log(address)
+        is_valid = is_valid_address(address)
+        if is_valid:
+            context = GetContext()
+            result = get_alias_count(context, address)
+            return result
+        else:
+            Notify('invalid input address')
+            return False
     Notify('invalid argument length')
     return False
 
@@ -216,6 +219,7 @@ def do_count_all_aliases() -> number:
 
 
 def do_get_storage(args: list) -> bytearray:
+    # TODO: restrict to owner access
     Log('do_get_storage triggered.')
     if len(args) > 0:
         context = GetContext()
@@ -231,6 +235,7 @@ def do_get_storage(args: list) -> bytearray:
 
 
 def do_set_storage(args: list) -> bytearray:
+    # TODO: restrict to owner access
     Log('do_set_storage triggered.')
     if len(args) > 1:
         context = GetContext()
@@ -246,24 +251,20 @@ def do_set_storage(args: list) -> bytearray:
     return False
 
 
-# -- Concrete methods
+# -- Concrete methods with business logic
 
 
 def get_alias_count(context, address: str) -> int:
-    # TODO: validate address
     Log('get_alias_count triggered.')
     key = prepare_count_key(address)
     Log('key:')
     Log(key)
     value = Get(context, key)
     if value == None:  # Must use ==. use 'is' provides false negative
-        Log('oh, value detected to be None.')
-        value = 0
+        Log('Value detected to be None, return zero instead')
+        return 0
     else:
-        value = value + 0  # trick value to always be an integer # NOTE: is this even a real hack?
-    Log('value:')
-    Log(value)
-    return value
+        return value
 
 
 def set_alias_count(context, address: str, count: int) -> bool:
@@ -375,7 +376,7 @@ def is_valid_vote(address: str, point: int) -> bool:
     return False
 
 
-# -- Helper methods
+# -- Dumb, functional methods
 
 
 def prepare_count_key(address: str) -> str:
@@ -394,3 +395,13 @@ def prepare_score_key(address: str, index: int) -> str:
     key = concat(key, index)
     key = concat(key, '_score')
     return key
+
+
+def is_valid_address(address: str) -> bool:
+    '''
+    The real check isn't the length itself, but ability to perform len() whenout error'ed out.
+    If provided string isn't a valid NEO address, you'll run into:
+    - TypeError: object of type 'UInt160' has no len()
+    '''
+    length = len(address)
+    return True
