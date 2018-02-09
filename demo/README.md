@@ -56,3 +56,26 @@ String = 0x07
 Array = 0x10
 Void = 0xff
 ```
+
+### Address looking string
+
+* `AK2nJJpJr6o664CWJKi1QRXjqeic2zRp8y`
+* `Alice00000000000000000000000000000` (bad)
+* `Bob0000000000000000000000000000000` (bad)
+* `AYUhHYViEoXEWeLQsXU9y1taps4nvjAHiy`
+* `AZLvNpvTmDvEL4Qc5AH64vniSJe11LHzWU`
+* `AVmVCX76hYzpZnx5mZV7JcxKpPBHVnyzjd`
+
+### More example executions
+
+```
+
+build ./demo/contracts/projects/neo-alias.py test 0710 05 True False count_alias ['AYUhHYViEoXEWeLQsXU9y1taps4nvjAHiy']
+build ./demo/contracts/projects/neo-alias.py test 0710 05 True False set_alias ['AYUhHYViEoXEWeLQsXU9y1taps4nvjAHiy','ayu']
+build ./demo/contracts/projects/neo-alias.py test 0710 05 True False set_alias ['AZLvNpvTmDvEL4Qc5AH64vniSJe11LHzWU','azul']
+
+```
+
+
+
+
