@@ -7,7 +7,7 @@ Import Command:
     import contract ./demo/contracts/projects/neo-alias.avm 0710 05 True False
 
 Example Invocation:
-    testinvoke d25fa44cbed195c9f200ff74fec9630005fa27b8 version
+    testinvoke 6d6491ff4bde82644805c52124798034aa5b2e9f version
 
 TODO:
     - record each vote
@@ -29,7 +29,7 @@ from boa.code.builtins import concat, list, range, take, substr
 
 
 # Global
-VERSION = 10
+VERSION = 12
 OWNER = b'#\xba\'\x03\xc52c\xe8\xd6\xe5"\xdc2 39\xdc\xd8\xee\xe9'  # script hash for address: AK2nJJpJr6o664CWJKi1QRXjqeic2zRp8y
 # NEO_ASSET_ID = b'\x9b|\xff\xda\xa6t\xbe\xae\x0f\x93\x0e\xbe`\x85\xaf\x90\x93\xe5\xfeV\xb3J\\"\x0c\xcd\xcfn\xfc3o\xc5'
 # GAS_ASSET_ID = b'\xe7-(iy\xeel\xb1\xb7\xe6]\xfd\xdf\xb2\xe3\x84\x10\x0b\x8d\x14\x8ewX\xdeB\xe4\x16\x8bqy,`'
@@ -145,15 +145,18 @@ def do_set_alias(args: list) -> bool:
     if len(args) > 0:
         address = args[0]
         new_alias = args[1]
-        is_valid_ad = is_valid_address(address)
-        is_valid_al = is_valid_alias(new_alias)
-        if is_valid_ad and is_valid_al:
-            context = GetContext()
-            result = append_alias(context, address, new_alias)
-            return result
-        else:
-            Notify('invlid input address or alias')
-            return False
+        context = GetContext()
+        result = append_alias(context, address, new_alias)
+        return result
+        # is_valid_ad = is_valid_address(address)
+        # is_valid_al = is_valid_alias(new_alias)
+        # if is_valid_ad and is_valid_al:
+        #     context = GetContext()
+        #     result = append_alias(context, address, new_alias)
+        #     return result
+        # else:
+        #     Notify('invlid input address or alias')
+        #     return False
     Notify('invalid argument length')
     return False
 

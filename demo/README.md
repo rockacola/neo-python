@@ -24,6 +24,8 @@
 * Password: `1234567890`
 * Script hash: `b'\xd8\xa3[\x14L\xa8\xd3\xfa\x00\xad\x83T\xed\xd2\x87G\xfb_\xffJ'`
 
+---
+
 ## Development Notes
 
 ### To know
@@ -32,6 +34,8 @@
 * Learn how to convert bytecode script hash into contract hash
 * Learn how to convert private key into wallet public key into wallet hash
 * Get random working, via different methods
+
+---
 
 ## Developer References
 
@@ -76,6 +80,40 @@ build ./demo/contracts/projects/neo-alias.py test 0710 05 True False set_alias [
 
 ```
 
+### Smoke tests on Privnet
+
+* Start by checking the alias counts
+
+```
+build ./demo/contracts/projects/neo-alias.py test 0710 05 True False version
+build ./demo/contracts/projects/neo-alias.py test 0710 05 True False count_all
+build ./demo/contracts/projects/neo-alias.py test 0710 05 True False count_alias ['AYUhHYViEoXEWeLQsXU9y1taps4nvjAHiy']
+```
+
+* Non realistic alias assignment
+
+```
+build ./demo/contracts/projects/neo-alias.py test 0710 05 True False set_alias ['addr1','aliasA']
+build ./demo/contracts/projects/neo-alias.py test 0710 05 True False set_alias ['addr1','aliasB']
+build ./demo/contracts/projects/neo-alias.py test 0710 05 True False set_alias ['addr2','aliasC']
+```
 
 
+
+### Smoke tests on Testnet
+
+* Start by checking the alias counts
+
+```
+testinvoke 6d6491ff4bde82644805c52124798034aa5b2e9f count_all
+testinvoke 6d6491ff4bde82644805c52124798034aa5b2e9f count_alias ['AYUhHYViEoXEWeLQsXU9y1taps4nvjAHiy']
+```
+
+* Assign some aliases to few addresses
+
+```
+testinvoke 6d6491ff4bde82644805c52124798034aa5b2e9f set_alias ['AYUhHYViEoXEWeLQsXU9y1taps4nvjAHiy','yuri']
+testinvoke 6d6491ff4bde82644805c52124798034aa5b2e9f set_alias ['AYUhHYViEoXEWeLQsXU9y1taps4nvjAHiy','yuri2']
+testinvoke 6d6491ff4bde82644805c52124798034aa5b2e9f set_alias ['AZLvNpvTmDvEL4Qc5AH64vniSJe11LHzWU','zera']
+```
 
