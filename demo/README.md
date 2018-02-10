@@ -28,7 +28,27 @@
 
 ## Development Notes
 
-TBA
+## Start a fresh docker container
+
+### Re-download/update container
+
+* `docker stop neo-privnet-with-gas`
+* `docker rm neo-privnet-with-gas`
+* `docker pull metachris/neo-privnet-with-gas`
+* `docker run -d --name neo-privnet-with-gas -p 20333-20336:20333-20336/tcp -p 30333-30336:30333-30336/tcp metachris/neo-privnet-with-gas`
+
+### Remove existing chain
+
+* `cd /Users/travis/ProjectGit/rockacola/neo-python`
+* `rm -rf Chains/privnet`
+
+You should now have a fresh blockchain ready to go.
+
+## In order to claim GAS
+
+* Make a transaction to yourself. That can be achieved by sending NEO to yourself: `send NEO AK2nJJpJr6o664CWJKi1QRXjqeic2zRp8y 1`
+* Execute `wallet`, notice the `claim.unavailable` value changed over to `claim.available`.
+* Claim GAS by: `wallet claim`
 
 ---
 
@@ -122,14 +142,17 @@ build ./demo/contracts/projects/neo-alias.py test 0710 05 True False get_alias [
 * Start by checking the alias counts
 
 ```
-testinvoke 6d6491ff4bde82644805c52124798034aa5b2e9f count_all
-testinvoke 6d6491ff4bde82644805c52124798034aa5b2e9f count_alias ['AYUhHYViEoXEWeLQsXU9y1taps4nvjAHiy']
+testinvoke 8da85fb01a367bc214482d11c929d8ee5f090bcf count_all
+testinvoke 8da85fb01a367bc214482d11c929d8ee5f090bcf count_alias ['AYUhHYViEoXEWeLQsXU9y1taps4nvjAHiy']
 ```
 
 * Assign some aliases to few addresses
 
 ```
-testinvoke 6d6491ff4bde82644805c52124798034aa5b2e9f set_alias ['AYUhHYViEoXEWeLQsXU9y1taps4nvjAHiy','yuri']
-testinvoke 6d6491ff4bde82644805c52124798034aa5b2e9f set_alias ['AYUhHYViEoXEWeLQsXU9y1taps4nvjAHiy','yuri2']
-testinvoke 6d6491ff4bde82644805c52124798034aa5b2e9f set_alias ['AZLvNpvTmDvEL4Qc5AH64vniSJe11LHzWU','zera']
+testinvoke 8da85fb01a367bc214482d11c929d8ee5f090bcf set_alias ['AYUhHYViEoXEWeLQsXU9y1taps4nvjAHiy','yuri']
+testinvoke 8da85fb01a367bc214482d11c929d8ee5f090bcf set_alias ['AYUhHYViEoXEWeLQsXU9y1taps4nvjAHiy','yuri2']
+testinvoke 8da85fb01a367bc214482d11c929d8ee5f090bcf set_alias ['AZLvNpvTmDvEL4Qc5AH64vniSJe11LHzWU','zera']
+testinvoke 8da85fb01a367bc214482d11c929d8ee5f090bcf count_alias ['AYUhHYViEoXEWeLQsXU9y1taps4nvjAHiy']
+testinvoke 8da85fb01a367bc214482d11c929d8ee5f090bcf get_alias ['AYUhHYViEoXEWeLQsXU9y1taps4nvjAHiy',1]
+testinvoke 8da85fb01a367bc214482d11c929d8ee5f090bcf count_alias ['AZLvNpvTmDvEL4Qc5AH64vniSJe11LHzWU']
 ```
