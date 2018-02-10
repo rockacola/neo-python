@@ -156,3 +156,10 @@ testinvoke 8da85fb01a367bc214482d11c929d8ee5f090bcf count_alias ['AYUhHYViEoXEWe
 testinvoke 8da85fb01a367bc214482d11c929d8ee5f090bcf get_alias ['AYUhHYViEoXEWeLQsXU9y1taps4nvjAHiy',1]
 testinvoke 8da85fb01a367bc214482d11c929d8ee5f090bcf count_alias ['AZLvNpvTmDvEL4Qc5AH64vniSJe11LHzWU']
 ```
+
+* Vote alias
+
+```
+testinvoke 8da85fb01a367bc214482d11c929d8ee5f090bcf vote_alias ['AYUhHYViEoXEWeLQsXU9y1taps4nvjAHiy',0,1]
+testinvoke 8da85fb01a367bc214482d11c929d8ee5f090bcf get_alias_score ['AYUhHYViEoXEWeLQsXU9y1taps4nvjAHiy',0]
+```
