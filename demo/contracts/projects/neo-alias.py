@@ -113,7 +113,7 @@ def Main(operation: str, args: list) -> bytearray:
 
 
 def do_version() -> int:
-    version = VERSION
+    version = VERSION + 0
     Log('version:')
     Log(version)
     return version
@@ -124,39 +124,25 @@ def do_is_owner() -> bool:
 
 
 def do_count_alias(args: list) -> int:
-    Log('do_count_alias triggered')
+    # Log('do_count_alias triggered.')
+    # Log('args:')
+    # Log(args)
     if len(args) > 0:
+        context = GetContext()
         address = args[0]
-        Log('address:')
-        Log(address)
-        is_valid = is_valid_address(address)
-        if is_valid:
-            context = GetContext()
-            result = get_alias_count(context, address)
-            return result
-        else:
-            Notify('invalid input address')
-            return False
+        result = get_alias_count(context, address)
+        return result
     Notify('invalid argument length')
     return False
 
 
 def do_set_alias(args: list) -> bool:
     if len(args) > 0:
+        context = GetContext()
         address = args[0]
         new_alias = args[1]
-        context = GetContext()
         result = append_alias(context, address, new_alias)
         return result
-        # is_valid_ad = is_valid_address(address)
-        # is_valid_al = is_valid_alias(new_alias)
-        # if is_valid_ad and is_valid_al:
-        #     context = GetContext()
-        #     result = append_alias(context, address, new_alias)
-        #     return result
-        # else:
-        #     Notify('invlid input address or alias')
-        #     return False
     Notify('invalid argument length')
     return False
 
@@ -199,18 +185,12 @@ def do_vote_alias(args: list) -> int:
         context = GetContext()
         address = args[0]
         index = args[1]
-        Log('index:')
-        Log(index)
         point = args[2]
         count = get_alias_count(context, address)
-        Log('count:')
-        Log(count)
         if (index < 0 or index >= count):  # Validate target index
             Notify('Invalid index value provided')
             return False
-
-        is_valid = is_valid_vote(address, point)
-        if not is_valid:
+        if point != 1 and point != -1:  # Validate vote point value
             Notify('Invalid vote point provided')
             return False
         else:
@@ -264,17 +244,20 @@ def do_set_storage(args: list) -> bytearray:
 
 
 def get_alias_count(context, address: str) -> int:
-    # Log('get_alias_count triggered.')
+    # TODO: validate address
+    Log('get_alias_count triggered.')
     key = prepare_count_key(address)
-    # Log('key:')
-    # Log(key)
+    Log('key:')
+    Log(key)
     value = Get(context, key)
     if value == None:  # Must use ==. use 'is' provides false negative
-        Log('Value detected to be None, return zero instead')
-        return 0
+        Log('oh, value detected to be None.')
+        value = 0
     else:
-        value = value + 0  # trick bytearray into bytes/int
-        return value
+        value = value + 0  # trick value to always be an integer # NOTE: is this even a real hack?
+    Log('value:')
+    Log(value)
+    return value
 
 
 def set_alias_count(context, address: str, count: int) -> bool:
@@ -367,31 +350,19 @@ def set_alias_score(context, address: str, index: int, score: int) -> bool:
 
 
 def get_all_count(context) -> int:
-    Log('get_all_count triggered')
-    count = get_alias_count(context, 'all')
-    Log('count:')
-    Log(count)
-    return count
+    result = get_alias_count(context, 'all')
+    return result
 
 
 def set_all_alias(context, index: int, value: str) -> bool:
-    Log('set_all_alias triggered')
     key = prepare_alias_key('all', index)
     Put(context, key, value)
     return True
 
 
 def increment_all_count(context, existing_count: int) -> bool:
-    Log('increment_all_count triggered')
     result = increment_alias_count(context, 'all', existing_count)
     return result
-
-
-def is_valid_vote(address: str, point: int) -> bool:
-    Log('is_valid_vote triggered.')
-    if point == 1 or point == -1:
-        return True
-    return False
 
 
 # -- Dumb, functional methods
@@ -403,10 +374,7 @@ def prepare_count_key(address: str) -> str:
 
 
 def prepare_alias_key(address: str, index: int) -> str:
-    # key = concat(address, '_')
-    # key = concat(key, index)
-    key = concat('w_', address)
-    key = concat(key, '_')
+    key = concat(address, '_')
     key = concat(key, index)
     return key
 
@@ -416,18 +384,3 @@ def prepare_score_key(address: str, index: int) -> str:
     key = concat(key, index)
     key = concat(key, '_score')
     return key
-
-
-def is_valid_address(address: str) -> bool:
-    '''
-    The real check isn't the length itself, but ability to perform len() whenout error'ed out.
-    If provided string isn't a valid NEO address, you'll run into:
-    - TypeError: object of type 'UInt160' has no len()
-    '''
-    length = len(address)
-    return True
-
-
-def is_valid_alias(alias: str) -> bool:
-    # Currently it's just a placeholder
-    return True
