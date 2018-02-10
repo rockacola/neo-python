@@ -137,6 +137,13 @@ build ./demo/contracts/projects/neo-alias.py test 0710 05 True False count_alias
 build ./demo/contracts/projects/neo-alias.py test 0710 05 True False get_alias ['AVmVCX76hYzpZnx5mZV7JcxKpPBHVnyzjd',0]
 ```
 
+* Vote
+
+```
+build ./demo/contracts/projects/neo-alias.py test 0710 05 True False vote_alias ['AYUhHYViEoXEWeLQsXU9y1taps4nvjAHiy',0,1] --attach-gas=0.001
+build ./demo/contracts/projects/neo-alias.py test 0710 05 True False get_alias_score ['AYUhHYViEoXEWeLQsXU9y1taps4nvjAHiy',0]
+```
+
 ### Smoke tests on Testnet
 
 * Start by checking the alias counts
