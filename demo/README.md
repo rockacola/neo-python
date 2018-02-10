@@ -28,12 +28,7 @@
 
 ## Development Notes
 
-### To know
-
-* How can I obtain invoker's wallet address, in byte array and string
-* Learn how to convert bytecode script hash into contract hash
-* Learn how to convert private key into wallet public key into wallet hash
-* Get random working, via different methods
+TBA
 
 ---
 
@@ -73,11 +68,9 @@ Void = 0xff
 ### More example executions
 
 ```
-
 build ./demo/contracts/projects/neo-alias.py test 0710 05 True False count_alias ['AYUhHYViEoXEWeLQsXU9y1taps4nvjAHiy']
 build ./demo/contracts/projects/neo-alias.py test 0710 05 True False set_alias ['AYUhHYViEoXEWeLQsXU9y1taps4nvjAHiy','ayu']
 build ./demo/contracts/projects/neo-alias.py test 0710 05 True False set_alias ['AZLvNpvTmDvEL4Qc5AH64vniSJe11LHzWU','azul']
-
 ```
 
 ### Smoke tests on Privnet
@@ -110,6 +103,20 @@ build ./demo/contracts/projects/neo-alias.py test 0710 05 True False count_alias
 build ./demo/contracts/projects/neo-alias.py test 0710 05 True False get_alias ['AYUhHYViEoXEWeLQsXU9y1taps4nvjAHiy',1]
 ```
 
+* Stress test on various of alias format
+
+** Can't have space character
+
+```
+build ./demo/contracts/projects/neo-alias.py test 0710 05 True False set_alias ['AVmVCX76hYzpZnx5mZV7JcxKpPBHVnyzjd','vicky-vim']
+build ./demo/contracts/projects/neo-alias.py test 0710 05 True False set_alias ['AVmVCX76hYzpZnx5mZV7JcxKpPBHVnyzjd','Victa m. Veon']  # Fails
+build ./demo/contracts/projects/neo-alias.py test 0710 05 True False set_alias ['AVmVCX76hYzpZnx5mZV7JcxKpPBHVnyzjd','Vic Veon']  # Fails
+build ./demo/contracts/projects/neo-alias.py test 0710 05 True False set_alias ['AVmVCX76hYzpZnx5mZV7JcxKpPBHVnyzjd','Van.Von']
+build ./demo/contracts/projects/neo-alias.py test 0710 05 True False set_alias ['AVmVCX76hYzpZnx5mZV7JcxKpPBHVnyzjd','Ven签名']
+build ./demo/contracts/projects/neo-alias.py test 0710 05 True False count_alias ['AVmVCX76hYzpZnx5mZV7JcxKpPBHVnyzjd']
+build ./demo/contracts/projects/neo-alias.py test 0710 05 True False get_alias ['AVmVCX76hYzpZnx5mZV7JcxKpPBHVnyzjd',0]
+```
+
 ### Smoke tests on Testnet
 
 * Start by checking the alias counts
@@ -126,4 +133,3 @@ testinvoke 6d6491ff4bde82644805c52124798034aa5b2e9f set_alias ['AYUhHYViEoXEWeLQ
 testinvoke 6d6491ff4bde82644805c52124798034aa5b2e9f set_alias ['AYUhHYViEoXEWeLQsXU9y1taps4nvjAHiy','yuri2']
 testinvoke 6d6491ff4bde82644805c52124798034aa5b2e9f set_alias ['AZLvNpvTmDvEL4Qc5AH64vniSJe11LHzWU','zera']
 ```
-
