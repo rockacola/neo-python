@@ -96,9 +96,19 @@ build ./demo/contracts/projects/neo-alias.py test 0710 05 True False count_alias
 build ./demo/contracts/projects/neo-alias.py test 0710 05 True False set_alias ['addr1','aliasA']
 build ./demo/contracts/projects/neo-alias.py test 0710 05 True False set_alias ['addr1','aliasB']
 build ./demo/contracts/projects/neo-alias.py test 0710 05 True False set_alias ['addr2','aliasC']
+build ./demo/contracts/projects/neo-alias.py test 0710 05 True False count_alias ['addr1']
+build ./demo/contracts/projects/neo-alias.py test 0710 05 True False get_alias ['addr1',1]
 ```
 
+* Realistic alias assignment
 
+```
+build ./demo/contracts/projects/neo-alias.py test 0710 05 True False set_alias ['AYUhHYViEoXEWeLQsXU9y1taps4nvjAHiy','yuri']
+build ./demo/contracts/projects/neo-alias.py test 0710 05 True False set_alias ['AYUhHYViEoXEWeLQsXU9y1taps4nvjAHiy','yuri2']
+build ./demo/contracts/projects/neo-alias.py test 0710 05 True False set_alias ['AZLvNpvTmDvEL4Qc5AH64vniSJe11LHzWU','zera']
+build ./demo/contracts/projects/neo-alias.py test 0710 05 True False count_alias ['AYUhHYViEoXEWeLQsXU9y1taps4nvjAHiy']
+build ./demo/contracts/projects/neo-alias.py test 0710 05 True False get_alias ['AYUhHYViEoXEWeLQsXU9y1taps4nvjAHiy',1]
+```
 
 ### Smoke tests on Testnet
 
