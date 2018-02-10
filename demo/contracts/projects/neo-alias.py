@@ -7,7 +7,7 @@ Import Command:
     import contract ./demo/contracts/projects/neo-alias.avm 0710 05 True False
 
 Example Invocation:
-    testinvoke 8da85fb01a367bc214482d11c929d8ee5f090bcf version
+    testinvoke 78d5c1ce1f227b987c6650106e7ceb1626b36879 version
 
 TODO:
     - record each vote
