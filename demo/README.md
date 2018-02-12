@@ -24,6 +24,14 @@
 * Password: `1234567890`
 * Script hash: `b'\xd8\xa3[\x14L\xa8\xd3\xfa\x00\xad\x83T\xed\xd2\x87G\xfb_\xffJ'`
 
+#### piccolo
+
+* Address: `AVUfegS354LWRoBuCzuKjGCYkT3tnpFFTD`
+* WIF: `L3QKsExhzK7VXVeEKidZuJgsXLHVoTTNRRU9mQVdnwRkpRhbXG38`
+* Password: `1234567890`
+* Script hash: `...`
+* Should have ~2000 GAS in testnet
+
 ---
 
 ## Development Notes
@@ -43,6 +51,11 @@
 * `rm -rf Chains/privnet`
 
 You should now have a fresh blockchain ready to go.
+
+
+## Import wallet using WIF
+
+* `import wif [WIF]`
 
 ## In order to claim GAS
 
