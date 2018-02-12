@@ -24,9 +24,9 @@ Import Command:
     import contract ./demo/contracts/util-contract.avm 0710 05 True False
 
 Example Invocation:
-    testinvoke 565e6b82ef1afc7c452dbb651146ff11f93a3191 version
-    testinvoke 565e6b82ef1afc7c452dbb651146ff11f93a3191 my_address [] --attach-gas=1 # Output: b'#\xba\'\x03\xc52c\xe8\xd6\xe5"\xdc2 39\xdc\xd8\xee\xe9'
-    testinvoke 565e6b82ef1afc7c452dbb651146ff11f93a3191 is_address ['AK2nJJpJr6o664CWJKi1QRXjqeic2zRp8y'] --attach-gas=1
+    testinvoke 8322cac3d30094c947615c944e9d3734b6e467bc version
+    testinvoke 8322cac3d30094c947615c944e9d3734b6e467bc my_address [] --attach-gas=1 # Output: b'#\xba\'\x03\xc52c\xe8\xd6\xe5"\xdc2 39\xdc\xd8\xee\xe9'
+    testinvoke 8322cac3d30094c947615c944e9d3734b6e467bc is_address ['AK2nJJpJr6o664CWJKi1QRXjqeic2zRp8y'] --attach-gas=1
 """
 from boa.blockchain.vm.System.ExecutionEngine import GetScriptContainer, GetExecutingScriptHash
 from boa.blockchain.vm.Neo.Transaction import *

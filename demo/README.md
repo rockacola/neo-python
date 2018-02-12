@@ -59,7 +59,8 @@ You should now have a fresh blockchain ready to go.
 
 ## In order to claim GAS
 
-* Make a transaction to yourself. That can be achieved by sending NEO to yourself: `send NEO AK2nJJpJr6o664CWJKi1QRXjqeic2zRp8y 1`
+* Make a transaction to yourself. That can be achieved by sending NEO to yourself:
+  * `send NEO AK2nJJpJr6o664CWJKi1QRXjqeic2zRp8y 1`
 * Execute `wallet`, notice the `claim.unavailable` value changed over to `claim.available`.
 * Claim GAS by: `wallet claim`
 
