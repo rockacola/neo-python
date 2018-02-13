@@ -29,7 +29,7 @@
 * Address: `AVUfegS354LWRoBuCzuKjGCYkT3tnpFFTD`
 * WIF: `L3QKsExhzK7VXVeEKidZuJgsXLHVoTTNRRU9mQVdnwRkpRhbXG38`
 * Password: `1234567890`
-* Script hash: `...`
+* Script hash: `b'\\x96P\\xac\\xd6\\xb7S,\\xb4\\xeaiU\\xedK\\x0f\\xd3\\xaa\\xa9\\xc9Q\\x87'`
 * Should have ~2000 GAS in testnet
 
 ---
