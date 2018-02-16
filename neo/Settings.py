@@ -10,6 +10,8 @@ import json
 import os
 import logging
 from json.decoder import JSONDecodeError
+
+from neo import __version__
 from neocore.Cryptography import Helper
 
 import logzero
@@ -47,18 +49,21 @@ class SettingsHolder:
 
     LEVELDB_PATH = None
     NOTIFICATION_DB_PATH = None
+
+    RPC_PORT = None
     NODE_PORT = None
     WS_PORT = None
     URI_PREFIX = None
-    VERSION_NAME = None
     BOOTSTRAP_FILE = None
+    NOTIF_BOOTSTRAP_FILE = None
 
     ALL_FEES = None
-
     USE_DEBUG_STORAGE = False
 
+    VERSION_NAME = "/NEO-PYTHON:%s/" % __version__
+
     # Logging settings
-    log_smart_contract_events = True
+    log_smart_contract_events = False
 
     # Helpers
     @property
@@ -103,11 +108,13 @@ class SettingsHolder:
 
         config = data['ApplicationConfiguration']
         self.LEVELDB_PATH = os.path.join(DIR_PROJECT_ROOT, config['DataDirectoryPath'])
+        self.RPC_PORT = int(config['RPCPort'])
         self.NODE_PORT = int(config['NodePort'])
         self.WS_PORT = config['WsPort']
         self.URI_PREFIX = config['UriPrefix']
-        self.VERSION_NAME = config['VersionName']
+
         self.BOOTSTRAP_FILE = config['BootstrapFile']
+        self.NOTIF_BOOTSTRAP_FILE = config['NotificationBootstrapFile']
 
         Helper.ADDRESS_VERSION = self.ADDRESS_VERSION
 
