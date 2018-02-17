@@ -18,6 +18,7 @@ Performance TODO:
     - tweak structure in a way, where truthy operations should be the shortest path
 NOTES:
     - {target_address}_{alias_index}_{invoker_address} = {point}
+    - DON'T FORGET TO CHANGE HARDCODED OWNER TO PICCOLO!
 """
 from boa.blockchain.vm.System.ExecutionEngine import GetScriptContainer, GetExecutingScriptHash
 from boa.blockchain.vm.Neo.Transaction import *
@@ -31,7 +32,7 @@ from boa.code.builtins import concat, list, range, take, substr
 
 
 # Global
-VERSION = 14
+VERSION = 15
 OWNER = b'#\xba\'\x03\xc52c\xe8\xd6\xe5"\xdc2 39\xdc\xd8\xee\xe9'  # script hash for address: AK2nJJpJr6o664CWJKi1QRXjqeic2zRp8y
 # NEO_ASSET_ID = b'\x9b|\xff\xda\xa6t\xbe\xae\x0f\x93\x0e\xbe`\x85\xaf\x90\x93\xe5\xfeV\xb3J\\"\x0c\xcd\xcfn\xfc3o\xc5'
 # GAS_ASSET_ID = b'\xe7-(iy\xeel\xb1\xb7\xe6]\xfd\xdf\xb2\xe3\x84\x10\x0b\x8d\x14\x8ewX\xdeB\xe4\x16\x8bqy,`'
@@ -47,7 +48,7 @@ def Main(operation: str, args: list) -> bytearray:
         is_owner = CheckWitness(OWNER)
         Log('Check is_owner:')
         Log(is_owner)
-        if is_owner:
+        if is_owner == True:
             return True
         return False
 
@@ -144,9 +145,10 @@ def do_count_alias(args: list) -> int:
 def do_set_alias(args: list) -> bool:
     if len(args) > 0:
         context = GetContext()
-        address = args[0]
-        new_alias = args[1]
-        result = append_alias(context, address, new_alias)
+        invoker_address = args[0]
+        target_address = args[1]
+        new_alias = args[2]
+        result = set_alias(context, invoker_address, target_address, new_alias)
         return result
     Notify('invalid argument length')
     return False
@@ -188,10 +190,11 @@ def do_vote_alias(args: list) -> int:
     # TODO: be conscious about vote caster, keep track of vote log and perform ACL check
     if len(args) > 2:
         context = GetContext()
-        address = args[0]
-        index = args[1]
-        point = args[2]
-        count = get_alias_count(context, address)
+        invoker_address = args[0]
+        target_address = args[1]
+        index = args[2]
+        point = args[3]
+        count = get_alias_count(context, target_address)
         if (index < 0 or index >= count):  # Validate target index
             Notify('Invalid index value provided')
             return False
@@ -199,7 +202,7 @@ def do_vote_alias(args: list) -> int:
             Notify('Invalid vote point provided')
             return False
         else:
-            result = vote_alias(context, address, index, point)
+            result = vote_alias(context, invoker_address, target_address, index, point)
             return result
     Notify('invalid argument length')
     return False
@@ -277,14 +280,12 @@ def increment_alias_count(context, address: str, existing_count: int) -> bool:
     return is_success
 
 
-def append_alias(context, address: str, new_alias: str) -> bool:
-    # TODO: get invokers address
-    # TODO: verify if this is the first time invoker assigning alias to target address
-    Log('append_alias triggered.')
-    index = get_alias_count(context, address)
+def set_alias(context, invoker_address: str, target_address: str, new_alias: str) -> bool:
+    Log('set_alias triggered.')
+    index = get_alias_count(context, target_address)
     Log('index:')
     Log(index)
-    key = prepare_alias_key(address, index)
+    key = prepare_alias_key(target_address, index)
     Log('key:')
     Log(key)
     Put(context, key, new_alias)
@@ -292,14 +293,15 @@ def append_alias(context, address: str, new_alias: str) -> bool:
     new_count = index + 1
     Log('new_count:')
     Log(new_count)
-    set_alias_count(context, address, new_count)
+    set_alias_count(context, target_address, new_count)
     # Keep track of all records
     all_index = get_all_count(context)
     Log('all_index:')
     Log(all_index)
     set_all_alias(context, all_index, key)  # Store alias key as value for all records
     increment_all_count(context, all_index)
-    # TODO: log invoker's address assignment
+    # Log invoker's address assignment, by giving it 1 point
+    vote_alias(context, invoker_address, target_address, index, 1)
     return True
 
 
@@ -323,33 +325,36 @@ def get_aliases(context, address: str) -> list:
     return alias_list
 
 
-def vote_alias(context, address: str, index: int, point: int) -> int:
+def vote_alias(context, invoker_address: str, target_address: str, index: int, point: int) -> int:
     Log('vote_alias triggered.')
-    # Get invoker address
-    invoker_address = get_invoker_address()
-    Log('invoker_address:')
-    Log(invoker_address)
-    # check if already voted previously
-    has_voted = check_has_voted(context, address, index, invoker_address)
-    Log('has_voted:')
-    Log(has_voted)
-    if has_voted == False:
-        # Get stored score for this alias
-        existing_score = get_alias_score(context, address, index)
-        Log('existing_score:')
-        Log(existing_score)
-        # Update value
-        new_score = existing_score + point
-        Log('new_score:')
-        Log(new_score)
-        # Store new score
-        set_alias_score(context, address, index, new_score)
-        # Set vote log
-        log_vote(context, address, index, new_score, invoker_address)
-        return new_score
-    else:
-        Notify('invoker has already voted for this alias')
-        return False
+    # Validate invoker address
+    is_match = CheckWitness(invoker_address)
+    Log('Check is_match:')
+    Log(is_match)
+    if is_match == True:
+        # Check if already voted previously
+        has_voted = check_has_voted(context, target_address, index, invoker_address)
+        Log('has_voted:')
+        Log(has_voted)
+        if has_voted == False:
+            # Get stored score for this alias
+            existing_score = get_alias_score(context, target_address, index)
+            Log('existing_score:')
+            Log(existing_score)
+            # Update value
+            new_score = existing_score + point
+            Log('new_score:')
+            Log(new_score)
+            # Store new score
+            set_alias_score(context, target_address, index, new_score)
+            # Set vote log
+            log_vote(context, invoker_address, target_address, index, new_score)
+            return new_score
+        else:
+            Notify('invoker has already voted for this alias')
+            return False
+    Notify('invalid invoker address provided')
+    return False
 
 
 def get_alias_score(context, address: str, index: int) -> int:
@@ -384,9 +389,9 @@ def increment_all_count(context, existing_count: int) -> bool:
     return result
 
 
-def check_has_voted(context, target_address: str, index: int, invoker_address: str) -> bool:
+def check_has_voted(context, invoker_address: str, target_address: str, index: int) -> bool:
     Log('check_has_voted triggered')
-    key = prepare_log_vote_key(target_address, index, invoker_address)
+    key = prepare_log_vote_key(invoker_address, target_address, index)
     value = Get(context, key)
     Log('value:')
     Log(value)
@@ -425,7 +430,7 @@ def prepare_score_key(address: str, index: int) -> str:
     return key
 
 
-def prepare_log_vote_key(target_address, index, invoker_address) -> str:
+def prepare_log_vote_key(invoker_address, target_address, index) -> str:
     # Format: {target_address}_{alias_index}_{invoker_address}
     key = concat(target_address, '_')
     key = concat(key, index)
