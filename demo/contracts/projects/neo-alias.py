@@ -18,6 +18,8 @@ Performance TODO:
     - tweak structure in a way, where truthy operations should be the shortest path
 NOTES:
     - {target_address}_{alias_index}_{invoker_address} = {point}
+KNOWN LIMITATIONS:
+    - No duplicate alias detection
 """
 from boa.blockchain.vm.System.ExecutionEngine import GetScriptContainer, GetExecutingScriptHash
 from boa.blockchain.vm.Neo.Transaction import *
