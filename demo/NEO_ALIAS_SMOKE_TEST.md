@@ -12,6 +12,7 @@
 build ./demo/contracts/projects/neo-alias.py test 0710 05 True False version
 build ./demo/contracts/projects/neo-alias.py test 0710 05 True False is_owner
 build ./demo/contracts/projects/neo-alias.py test 0710 05 True False count_all
+build ./demo/contracts/projects/neo-alias.py test 0710 05 True False get_storage ['all_\x00']
 ```
 
 ### Alias assignments

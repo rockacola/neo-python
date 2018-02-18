@@ -334,7 +334,7 @@ def get_aliases(context, address: str) -> list:
 def vote_alias(context, invoker_address: str, target_address: str, index: int, point: int) -> int:
     Log('vote_alias triggered.')
     # check if already voted previously
-    has_voted = check_has_voted(context, target_address, index, invoker_address)
+    has_voted = check_has_voted(context, invoker_address, target_address, index)
     Log('has_voted:')
     Log(has_voted)
     if has_voted == False:
@@ -349,7 +349,7 @@ def vote_alias(context, invoker_address: str, target_address: str, index: int, p
         # Store new score
         set_alias_score(context, target_address, index, new_score)
         # Set vote log
-        log_vote(context, target_address, index, new_score, invoker_address)
+        log_vote(context, invoker_address, target_address, index, new_score)
         return new_score
     else:
         Notify('invoker has already voted for this alias')
@@ -388,9 +388,9 @@ def increment_all_count(context, existing_count: int) -> bool:
     return result
 
 
-def check_has_voted(context, target_address: str, index: int, invoker_address: str) -> bool:
+def check_has_voted(context, invoker_address: str, target_address: str, index: int) -> bool:
     Log('check_has_voted triggered')
-    key = prepare_log_vote_key(target_address, index, invoker_address)
+    key = prepare_log_vote_key(invoker_address, target_address, index)
     value = Get(context, key)
     Log('value:')
     Log(value)
@@ -400,8 +400,8 @@ def check_has_voted(context, target_address: str, index: int, invoker_address: s
         return True
 
 
-def log_vote(context, target_address: str, index: int, score: int, invoker_address: str) -> bool:
-    key = prepare_log_vote_key(target_address, index, invoker_address)
+def log_vote(context, invoker_address: str, target_address: str, index: int, score: int) -> bool:
+    key = prepare_log_vote_key(invoker_address, target_address, index)
     Put(context, key, score)
     return True
 
@@ -429,7 +429,7 @@ def prepare_score_key(address: str, index: int) -> str:
     return key
 
 
-def prepare_log_vote_key(target_address, index, invoker_address) -> str:
+def prepare_log_vote_key(invoker_address: str, target_address: str, index: int) -> str:
     # Format: {target_address}_{alias_index}_{invoker_address}
     key = concat(target_address, '_')
     key = concat(key, index)
