@@ -1,4 +1,3 @@
-
 from boa.blockchain.vm.System.ExecutionEngine import GetScriptContainer
 from boa.blockchain.vm.Neo.Transaction import *
 from boa.blockchain.vm.Neo.Runtime import Log, Notify, GetTrigger, CheckWitness
@@ -60,18 +59,6 @@ def Main(operation: str, args: list) -> bytearray:
         elif operation == 'count_all':      # Count total alias assigned
             result = do_count_all_aliases()
             return result
-
-        # Moderation
-        # TODO: mark_bad_address(address, str)
-        # TODO: unmark_bad_address(address, str)
-        # TODO: mark_bad_alias(address, str, index: int)
-        # TODO: unmark_bad_alias(address, str, index: int)
-
-        # Access control
-        # TODO: assign_mod(address: str)
-        # TODO: resign_mod(address: str)
-        # TODO: assign_admin(address: str)
-        # TODO: resign_admin(address: str)
 
         # Admin Utilities
         elif operation == 'get_storage':
@@ -203,8 +190,11 @@ def do_count_all_aliases() -> number:
 
 
 def do_get_storage(args: list) -> bytearray:
-    # TODO: restrict to owner access
     Log('do_get_storage triggered.')
+    is_owner = CheckWitness(OWNER)
+    if is_owner == False:
+        Notify('permission denied')
+        return False
     if len(args) > 0:
         context = GetContext()
         key = args[0]
@@ -219,8 +209,11 @@ def do_get_storage(args: list) -> bytearray:
 
 
 def do_set_storage(args: list) -> bytearray:
-    # TODO: restrict to owner access
     Log('do_set_storage triggered.')
+    is_owner = CheckWitness(OWNER)
+    if is_owner == False:
+        Notify('permission denied')
+        return False
     if len(args) > 1:
         context = GetContext()
         key = args[0]
@@ -387,6 +380,7 @@ def log_vote(context, invoker_address: str, target_address: str, index: int, sco
     key = prepare_log_vote_key(invoker_address, target_address, index)
     Put(context, key, score)
     return True
+
 
 # -- Dumb, functional methods
 
