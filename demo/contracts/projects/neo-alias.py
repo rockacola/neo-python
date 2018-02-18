@@ -1,41 +1,17 @@
-"""
-Test Command:
-    build ./demo/contracts/projects/neo-alias.py test 0710 05 True False version
 
-Import Command:
-    import contract ./demo/contracts/projects/neo-alias.avm 0710 05 True False
-
-Example Invocation:
-    testinvoke 78d5c1ce1f227b987c6650106e7ceb1626b36879 version
-
-TODO:
-    - get_safe_str
-    - get_safe_int
-    - explore the idea of output status code (eg/ 'BAD_AUTH') to provide better diagnostic hints
-Performance TODO:
-    - tweak structure in a way, where truthy operations should be the shortest path
-NOTES:
-    - {target_address}_{alias_index}_{invoker_address} = {point}
-    - set_alias is currently costing 8+ GAS
-KNOWN LIMITATIONS:
-    - No duplicate alias detection
-"""
-from boa.blockchain.vm.System.ExecutionEngine import GetScriptContainer, GetExecutingScriptHash
+from boa.blockchain.vm.System.ExecutionEngine import GetScriptContainer
 from boa.blockchain.vm.Neo.Transaction import *
 from boa.blockchain.vm.Neo.Runtime import Log, Notify, GetTrigger, CheckWitness
 from boa.blockchain.vm.Neo.Blockchain import GetHeight, GetHeader
-from boa.blockchain.vm.Neo.Action import RegisterAction
 from boa.blockchain.vm.Neo.TriggerType import Application, Verification
-from boa.blockchain.vm.Neo.Storage import GetContext, Get, Put, Delete
-from boa.blockchain.vm.Neo.Output import GetScriptHash, GetValue, GetAssetId
-from boa.code.builtins import concat, list, range, take, substr
+from boa.blockchain.vm.Neo.Storage import GetContext, Get, Put
+from boa.blockchain.vm.Neo.Output import GetScriptHash
+from boa.code.builtins import concat, list, range
 
 
 # Global
-VERSION = 16
-OWNER = b'#\xba\'\x03\xc52c\xe8\xd6\xe5"\xdc2 39\xdc\xd8\xee\xe9'  # script hash for address: AK2nJJpJr6o664CWJKi1QRXjqeic2zRp8y
-# NEO_ASSET_ID = b'\x9b|\xff\xda\xa6t\xbe\xae\x0f\x93\x0e\xbe`\x85\xaf\x90\x93\xe5\xfeV\xb3J\\"\x0c\xcd\xcfn\xfc3o\xc5'
-# GAS_ASSET_ID = b'\xe7-(iy\xeel\xb1\xb7\xe6]\xfd\xdf\xb2\xe3\x84\x10\x0b\x8d\x14\x8ewX\xdeB\xe4\x16\x8bqy,`'
+VERSION = 17
+OWNER = b'\x96P\xac\xd6\xb7S,\xb4\xeaiU\xedK\x0f\xd3\xaa\xa9\xc9Q\x87'  # Script has for AVUfegS354LWRoBuCzuKjGCYkT3tnpFFTD
 
 
 # -- Chain of command
