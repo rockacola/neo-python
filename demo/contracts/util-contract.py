@@ -1,33 +1,3 @@
-"""
-TODO:
-- Get current transaction hash
-- Get invoker's address
-- Get attached asset details
-- Get string name of the type of input argument
-- Concate 2 values of any datatype together
-- Concate n strings together
-- String replace
-- String indexOf
-- Set key-value into context (test non-ASCII characters, and crazy length)
-- Get key-value from context
-- Check if a key exists in context
-- Array storage example (pop, push, fetch, count)
-
-Test Command:
-    build ./demo/contracts/util-contract.py test 0710 05 True False version
-    build ./demo/contracts/util-contract.py test 0710 05 True False my_address --attach-gas=1
-    build ./demo/contracts/util-contract.py test 0710 05 True False is_address ['AK2nJJpJr6o664CWJKi1QRXjqeic2zRp8y'] --attach-gas=1
-    build ./demo/contracts/util-contract.py test 0710 05 True False is_witness_address ['AK2nJJpJr6o664CWJKi1QRXjqeic2zRp8y']
-    build ./demo/contracts/util-contract.py test 0710 05 True False char_count ['AK2nJJpJr6o664CWJKi1QRXjqeic2zRp8y']
-
-Import Command:
-    import contract ./demo/contracts/util-contract.avm 0710 05 True False
-
-Example Invocation:
-    testinvoke 8322cac3d30094c947615c944e9d3734b6e467bc version
-    testinvoke 8322cac3d30094c947615c944e9d3734b6e467bc my_address [] --attach-gas=1 # Output: b'#\xba\'\x03\xc52c\xe8\xd6\xe5"\xdc2 39\xdc\xd8\xee\xe9'
-    testinvoke 8322cac3d30094c947615c944e9d3734b6e467bc is_address ['AK2nJJpJr6o664CWJKi1QRXjqeic2zRp8y'] --attach-gas=1
-"""
 from boa.blockchain.vm.System.ExecutionEngine import GetScriptContainer, GetExecutingScriptHash
 from boa.blockchain.vm.Neo.Transaction import *
 from boa.blockchain.vm.Neo.Runtime import Log, Notify, GetTrigger, CheckWitness
@@ -42,8 +12,8 @@ from boa.code.builtins import concat, list, range, take, substr
 # Global
 VERSION = 7
 OWNER = b'#\xba\'\x03\xc52c\xe8\xd6\xe5"\xdc2 39\xdc\xd8\xee\xe9'  # script hash for address: AK2nJJpJr6o664CWJKi1QRXjqeic2zRp8y
-# NEO_ASSET_ID = b'\x9b|\xff\xda\xa6t\xbe\xae\x0f\x93\x0e\xbe`\x85\xaf\x90\x93\xe5\xfeV\xb3J\\"\x0c\xcd\xcfn\xfc3o\xc5'
-# GAS_ASSET_ID = b'\xe7-(iy\xeel\xb1\xb7\xe6]\xfd\xdf\xb2\xe3\x84\x10\x0b\x8d\x14\x8ewX\xdeB\xe4\x16\x8bqy,`'
+NEO_ASSET_ID = b'\x9b|\xff\xda\xa6t\xbe\xae\x0f\x93\x0e\xbe`\x85\xaf\x90\x93\xe5\xfeV\xb3J\\"\x0c\xcd\xcfn\xfc3o\xc5'
+GAS_ASSET_ID = b'\xe7-(iy\xeel\xb1\xb7\xe6]\xfd\xdf\xb2\xe3\x84\x10\x0b\x8d\x14\x8ewX\xdeB\xe4\x16\x8bqy,`'
 
 
 def Main(operation: str, args: list) -> bytearray:
