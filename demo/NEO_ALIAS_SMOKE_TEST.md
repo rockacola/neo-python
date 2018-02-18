@@ -23,12 +23,12 @@ build ./demo/contracts/projects/neo-alias.py test 0710 05 True False get_storage
 ``` sh
 build ./demo/contracts/projects/neo-alias.py test 0710 05 True False count_alias ['AYUhHYViEoXEWeLQsXU9y1taps4nvjAHiy']
 build ./demo/contracts/projects/neo-alias.py test 0710 05 True False get_alias ['AYUhHYViEoXEWeLQsXU9y1taps4nvjAHiy',0]
-build ./demo/contracts/projects/neo-alias.py test 0710 05 True False set_alias ['AYUhHYViEoXEWeLQsXU9y1taps4nvjAHiy','ayu']
+build ./demo/contracts/projects/neo-alias.py test 0710 05 True False set_alias ['AK2nJJpJr6o664CWJKi1QRXjqeic2zRp8y','AYUhHYViEoXEWeLQsXU9y1taps4nvjAHiy','ayu']
 
 build ./demo/contracts/projects/neo-alias.py test 0710 05 True False count_alias ['AZLvNpvTmDvEL4Qc5AH64vniSJe11LHzWU']
 build ./demo/contracts/projects/neo-alias.py test 0710 05 True False get_alias ['AZLvNpvTmDvEL4Qc5AH64vniSJe11LHzWU',0]
-build ./demo/contracts/projects/neo-alias.py test 0710 05 True False set_alias ['AZLvNpvTmDvEL4Qc5AH64vniSJe11LHzWU','azrel.adams']
-build ./demo/contracts/projects/neo-alias.py test 0710 05 True False set_alias ['AZLvNpvTmDvEL4Qc5AH64vniSJe11LHzWU','azrel.adams签名']
+build ./demo/contracts/projects/neo-alias.py test 0710 05 True False set_alias ['AK2nJJpJr6o664CWJKi1QRXjqeic2zRp8y','AZLvNpvTmDvEL4Qc5AH64vniSJe11LHzWU','azrel.adams']
+build ./demo/contracts/projects/neo-alias.py test 0710 05 True False set_alias ['AK2nJJpJr6o664CWJKi1QRXjqeic2zRp8y','AZLvNpvTmDvEL4Qc5AH64vniSJe11LHzWU','azrel.adams签名']
 ```
 
 ### Alias score check

@@ -144,11 +144,18 @@ def do_count_alias(args: list) -> int:
 
 
 def do_set_alias(args: list) -> bool:
-    if len(args) > 0:
+    if len(args) > 2:
         context = GetContext()
-        address = args[0]
-        new_alias = args[1]
-        result = append_alias(context, address, new_alias)
+        invoker_address = args[0]
+        target_address = args[1]
+        new_alias = args[2]
+        is_match = CheckWitness(invoker_address)
+        # Log('Check is_match:')
+        # Log(is_match)
+        if is_match == False:  # Validate invoker
+            Notify('mismatch invoker address')
+            return False
+        result = set_alias(context, invoker_address, target_address, new_alias)
         return result
     Notify('invalid argument length')
     return False
@@ -285,14 +292,14 @@ def increment_alias_count(context, address: str, existing_count: int) -> bool:
     return is_success
 
 
-def append_alias(context, address: str, new_alias: str) -> bool:
+def set_alias(context, invoker_address: str, target_address: str, new_alias: str) -> bool:
     # TODO: get invokers address
     # TODO: verify if this is the first time invoker assigning alias to target address
-    Log('append_alias triggered.')
-    index = get_alias_count(context, address)
+    Log('set_alias triggered.')
+    index = get_alias_count(context, target_address)
     Log('index:')
     Log(index)
-    key = prepare_alias_key(address, index)
+    key = prepare_alias_key(target_address, index)
     Log('key:')
     Log(key)
     Put(context, key, new_alias)
@@ -300,7 +307,7 @@ def append_alias(context, address: str, new_alias: str) -> bool:
     new_count = index + 1
     Log('new_count:')
     Log(new_count)
-    set_alias_count(context, address, new_count)
+    set_alias_count(context, target_address, new_count)
     # Keep track of all records
     all_index = get_all_count(context)
     Log('all_index:')
