@@ -187,21 +187,27 @@ def do_get_aliases(args: list) -> list:
 
 
 def do_vote_alias(args: list) -> int:
-    # TODO: be conscious about vote caster, keep track of vote log and perform ACL check
-    if len(args) > 2:
+    if len(args) > 3:
         context = GetContext()
-        address = args[0]
-        index = args[1]
-        point = args[2]
-        count = get_alias_count(context, address)
+        invoker_address = args[0]
+        target_address = args[1]
+        index = args[2]
+        point = args[3]
+        count = get_alias_count(context, target_address)
         if (index < 0 or index >= count):  # Validate target index
-            Notify('Invalid index value provided')
+            Notify('invalid index value provided')
             return False
         if point != 1 and point != -1:  # Validate vote point value
-            Notify('Invalid vote point provided')
+            Notify('invalid vote point provided')
             return False
         else:
-            result = vote_alias(context, address, index, point)
+            is_match = CheckWitness(invoker_address)
+            # Log('Check is_match:')
+            # Log(is_match)
+            if is_match == False:  # Validate invoker
+                Notify('mismatch invoker address')
+                return False
+            result = vote_alias(context, invoker_address, target_address, index, point)
             return result
     Notify('invalid argument length')
     return False
@@ -325,19 +331,15 @@ def get_aliases(context, address: str) -> list:
     return alias_list
 
 
-def vote_alias(context, address: str, index: int, point: int) -> int:
+def vote_alias(context, invoker_address: str, target_address: str, index: int, point: int) -> int:
     Log('vote_alias triggered.')
-    # Get invoker address
-    invoker_address = get_invoker_address()
-    Log('invoker_address:')
-    Log(invoker_address)
     # check if already voted previously
-    has_voted = check_has_voted(context, address, index, invoker_address)
+    has_voted = check_has_voted(context, target_address, index, invoker_address)
     Log('has_voted:')
     Log(has_voted)
     if has_voted == False:
         # Get stored score for this alias
-        existing_score = get_alias_score(context, address, index)
+        existing_score = get_alias_score(context, target_address, index)
         Log('existing_score:')
         Log(existing_score)
         # Update value
@@ -345,9 +347,9 @@ def vote_alias(context, address: str, index: int, point: int) -> int:
         Log('new_score:')
         Log(new_score)
         # Store new score
-        set_alias_score(context, address, index, new_score)
+        set_alias_score(context, target_address, index, new_score)
         # Set vote log
-        log_vote(context, address, index, new_score, invoker_address)
+        log_vote(context, target_address, index, new_score, invoker_address)
         return new_score
     else:
         Notify('invoker has already voted for this alias')
