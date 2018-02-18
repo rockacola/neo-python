@@ -3,6 +3,7 @@
 ## Summary
 
 * Ensure smart contract event is enabled: `config sc-events on`
+* Open privnet wallet
 
 ## Against PrivNet
 

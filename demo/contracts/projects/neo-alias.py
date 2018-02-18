@@ -1,7 +1,6 @@
 """
 Test Command:
     build ./demo/contracts/projects/neo-alias.py test 0710 05 True False version
-    build ./demo/contracts/projects/neo-alias.py test 0710 05 True False get_storage ['addr2_\x01'] # To peek through a key-value pair
 
 Import Command:
     import contract ./demo/contracts/projects/neo-alias.avm 0710 05 True False
@@ -10,7 +9,6 @@ Example Invocation:
     testinvoke 78d5c1ce1f227b987c6650106e7ceb1626b36879 version
 
 TODO:
-    - record each vote
     - get_safe_str
     - get_safe_int
     - explore the idea of output status code (eg/ 'BAD_AUTH') to provide better diagnostic hints
@@ -18,6 +16,7 @@ Performance TODO:
     - tweak structure in a way, where truthy operations should be the shortest path
 NOTES:
     - {target_address}_{alias_index}_{invoker_address} = {point}
+    - set_alias is currently costing 8+ GAS
 KNOWN LIMITATIONS:
     - No duplicate alias detection
 """
@@ -33,7 +32,7 @@ from boa.code.builtins import concat, list, range, take, substr
 
 
 # Global
-VERSION = 14
+VERSION = 16
 OWNER = b'#\xba\'\x03\xc52c\xe8\xd6\xe5"\xdc2 39\xdc\xd8\xee\xe9'  # script hash for address: AK2nJJpJr6o664CWJKi1QRXjqeic2zRp8y
 # NEO_ASSET_ID = b'\x9b|\xff\xda\xa6t\xbe\xae\x0f\x93\x0e\xbe`\x85\xaf\x90\x93\xe5\xfeV\xb3J\\"\x0c\xcd\xcfn\xfc3o\xc5'
 # GAS_ASSET_ID = b'\xe7-(iy\xeel\xb1\xb7\xe6]\xfd\xdf\xb2\xe3\x84\x10\x0b\x8d\x14\x8ewX\xdeB\xe4\x16\x8bqy,`'
@@ -314,7 +313,8 @@ def set_alias(context, invoker_address: str, target_address: str, new_alias: str
     Log(all_index)
     set_all_alias(context, all_index, key)  # Store alias key as value for all records
     increment_all_count(context, all_index)
-    # TODO: log invoker's address assignment
+    # log invoker's address assignment by cast default 1 point vote
+    vote_alias(context, invoker_address, target_address, index, 1)  # TODO: we can reduce GAS cost by omit check_has_voted()
     return True
 
 
