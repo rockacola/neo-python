@@ -24,3 +24,19 @@ NOTES:
 KNOWN LIMITATIONS:
     - No duplicate alias detection
 ```
+
+## Future implementations
+
+``` py
+# Moderation
+# TODO: mark_bad_address(address, str)
+# TODO: unmark_bad_address(address, str)
+# TODO: mark_bad_alias(address, str, index: int)
+# TODO: unmark_bad_alias(address, str, index: int)
+
+# Access control
+# TODO: assign_mod(address: str)
+# TODO: resign_mod(address: str)
+# TODO: assign_admin(address: str)
+# TODO: resign_admin(address: str)
+```
