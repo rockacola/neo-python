@@ -10,7 +10,7 @@ Import Command:
     import contract ./demo/contracts/projects/neo-alias.avm 0710 05 True False
 
 Example Invocation:
-    testinvoke 78d5c1ce1f227b987c6650106e7ceb1626b36879 version
+    testinvoke 8a092d91a822192b20e91722dc3dea28dfdb5cbd version
 
 TODO:
     - get_safe_str
