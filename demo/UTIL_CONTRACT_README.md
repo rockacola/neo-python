@@ -16,11 +16,18 @@ TBA
 build ./demo/contracts/util-contract.py test 0710 05 True False version
 ```
 
-* Math
+* Constant
+
+``` sh
+build ./demo/contracts/util-contract.py test 0710 05 True False magic_number
+build ./demo/contracts/util-contract.py test 0710 05 True False magic_string
+build ./demo/contracts/util-contract.py test 0710 05 True False neo_id
+```
+
+* Number
 
 ``` sh
 build ./demo/contracts/util-contract.py test 0710 05 True False char_count ['AK2nJJpJr6o664CWJKi1QRXjqeic2zRp8y']
-
 ```
 
 * Storage
@@ -57,8 +64,7 @@ testinvoke 8322cac3d30094c947615c944e9d3734b6e467bc is_address ['AK2nJJpJr6o664C
 
 #### High priority
 
-* get string/int/bytearray from global variable
-* get string/int/bytearray from local variable
+* TBA
 
 #### Medium priority
 
@@ -76,4 +82,4 @@ testinvoke 8322cac3d30094c947615c944e9d3734b6e467bc is_address ['AK2nJJpJr6o664C
 
 #### Low priority
 
-TBA
+* TBA

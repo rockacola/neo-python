@@ -14,7 +14,8 @@ VERSION = 8
 OWNER = b'\x96P\xac\xd6\xb7S,\xb4\xeaiU\xedK\x0f\xd3\xaa\xa9\xc9Q\x87'
 NEO_ASSET_ID = b'\x9b|\xff\xda\xa6t\xbe\xae\x0f\x93\x0e\xbe`\x85\xaf\x90\x93\xe5\xfeV\xb3J\\"\x0c\xcd\xcfn\xfc3o\xc5'
 GAS_ASSET_ID = b'\xe7-(iy\xeel\xb1\xb7\xe6]\xfd\xdf\xb2\xe3\x84\x10\x0b\x8d\x14\x8ewX\xdeB\xe4\x16\x8bqy,`'
-
+MAGIC_NUMBER = 42
+MAGIC_STRING = 'rainbowsix'
 
 def Main(operation: str, args: list) -> bytearray:
     trigger = GetTrigger()
@@ -33,6 +34,16 @@ def Main(operation: str, args: list) -> bytearray:
             return result
         elif operation == 'is_owner':       # Checking if invoker is the owner of the smart contract
             result = do_is_owner()
+            return result
+        # Constant
+        elif operation == 'magic_number':   # Return stored number constant in the contract
+            result = do_magic_number()
+            return result
+        elif operation == 'magic_string':   # Return stored string constant in the contract
+            result = do_magic_string()
+            return result
+        elif operation == 'neo_id':         # Return stored bytearray constant in the contract
+            result = do_neo_id()
             return result
         # Number
         elif operation == 'add':            # Adding 2 numbers together
@@ -104,6 +115,24 @@ def do_version() -> int:
 
 def do_is_owner() -> bool:
     return CheckWitness(OWNER)
+
+
+# -- Contant
+
+
+def do_magic_number():
+    result = MAGIC_NUMBER
+    return result
+
+
+def do_magic_string():
+    result = MAGIC_STRING
+    return result
+
+
+def do_neo_id():
+    result = NEO_ASSET_ID
+    return result
 
 
 # -- Number
