@@ -10,7 +10,7 @@ from boa.code.builtins import concat, list, range, take, substr
 
 
 # Global
-VERSION = 7
+VERSION = 8
 OWNER = b'\x96P\xac\xd6\xb7S,\xb4\xeaiU\xedK\x0f\xd3\xaa\xa9\xc9Q\x87'
 NEO_ASSET_ID = b'\x9b|\xff\xda\xa6t\xbe\xae\x0f\x93\x0e\xbe`\x85\xaf\x90\x93\xe5\xfeV\xb3J\\"\x0c\xcd\xcfn\xfc3o\xc5'
 GAS_ASSET_ID = b'\xe7-(iy\xeel\xb1\xb7\xe6]\xfd\xdf\xb2\xe3\x84\x10\x0b\x8d\x14\x8ewX\xdeB\xe4\x16\x8bqy,`'
@@ -63,6 +63,13 @@ def Main(operation: str, args: list) -> bytearray:
             return result
         elif operation == 'add_array':      # Adding all numbers in array together
             result = do_add_array(args)
+            return result
+        # Storage
+        elif operation == 'set_storage':    # Update storage of specified key
+            result = do_set_storage(args)
+            return result
+        elif operation == 'get_storage':    # Obtain stored data of specified key
+            result = do_get_storage(args)
             return result
         # Block
         elif operation == 'height':         # Get current block height
@@ -196,6 +203,30 @@ def do_add_array(args: list) -> int:
     return False
 
 
+# -- Storage
+
+
+def do_set_storage(args: list) -> bool:
+    if len(args) > 1:
+        key = args[0]
+        data = args[1]
+        context = GetContext()
+        result = set_storage(context, key, data)
+        return result
+    Notify('invalid argument length')
+    return False
+
+
+def do_get_storage(args: list) -> bytearray:
+    if len(args) > 0:
+        key = args[0]
+        context = GetContext()
+        result = get_storage(context, key)
+        return result
+    Notify('invalid argument length')
+    return False
+
+
 # -- Block
 
 
@@ -283,3 +314,13 @@ def get_my_address() -> bytearray:
     # Log('sender_addr:')
     # Log(sender_addr)
     return sender_addr
+
+
+def set_storage(context, key: str, value: bytearray) -> bool:
+    Put(context, key, value)
+    return True
+
+
+def get_storage(context, key: str) -> bytearray:
+    value = Get(context, key)
+    return value
