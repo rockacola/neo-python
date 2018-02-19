@@ -17,7 +17,6 @@ TBA
 #### Medium priority
 
 * Get current transaction hash
-* Get invoker's address
 * Get attached asset details
 * Get string name of the type of input argument
 * Concate 2 values of any datatype together
@@ -26,7 +25,6 @@ TBA
 * String indexOf
 * Check if a key exists in context
 * Array storage example (pop, push, fetch, count)
-* Get block timestamp
 
 #### Low priority
 

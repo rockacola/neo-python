@@ -60,6 +60,10 @@ build ./demo/contracts/util-contract.py test 0710 05 True False get_storage ['cu
 
 ``` sh
 build ./demo/contracts/util-contract.py test 0710 05 True False height
+build ./demo/contracts/util-contract.py test 0710 05 True False current_timestamp
+build ./demo/contracts/util-contract.py test 0710 05 True False get_timestamp [1]
+build ./demo/contracts/util-contract.py test 0710 05 True False current_merkle
+build ./demo/contracts/util-contract.py test 0710 05 True False get_merkle [1]
 ```
 
 ### Account

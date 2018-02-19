@@ -2,6 +2,7 @@ from boa.blockchain.vm.System.ExecutionEngine import GetScriptContainer, GetExec
 from boa.blockchain.vm.Neo.Transaction import *
 from boa.blockchain.vm.Neo.Runtime import Log, Notify, GetTrigger, CheckWitness
 from boa.blockchain.vm.Neo.Blockchain import GetHeight, GetHeader
+from boa.blockchain.vm.Neo.Header import GetMerkleRoot, GetTimestamp, GetHash, GetVersion, GetNextConsensus
 from boa.blockchain.vm.Neo.Action import RegisterAction
 from boa.blockchain.vm.Neo.TriggerType import Application, Verification
 from boa.blockchain.vm.Neo.Storage import GetContext, Get, Put, Delete
@@ -85,6 +86,18 @@ def Main(operation: str, args: list) -> bytearray:
         # Block
         elif operation == 'height':         # Get current block height
             result = do_height()
+            return result
+        elif operation == 'current_timestamp':      # Get timestamp of current block
+            result = do_current_timestamp()
+            return result
+        elif operation == 'get_timestamp':      # Get timestamp of current block
+            result = do_get_timestamp(args)
+            return result
+        elif operation == 'current_merkle':
+            result = do_current_merkle()
+            return result
+        elif operation == 'get_merkle':
+            result = do_get_merkle(args)
             return result
         # Account
         elif operation == 'my_address':     # Get invoker's wallet address in bytearray
@@ -263,8 +276,81 @@ def do_get_storage(args: list) -> bytearray:
 
 
 def do_height() -> int:
+    Log('do_height triggered.')
     current_height = GetHeight()
+    Log('current_height:')
+    Log(current_height)
     return current_height
+
+
+def do_current_timestamp() -> bytearray:
+    Log('do_current_timestamp triggered.')
+    current_height = GetHeight()
+    Log('current_height:')
+    Log(current_height)
+    current_block = GetHeader(current_height)
+    # Log('current_block:')
+    # Log(current_block)
+    timestamp = current_block.Timestamp
+    Log('timestamp:')
+    Log(timestamp)
+    return timestamp
+
+
+def do_get_timestamp(args: list) -> bytearray:
+    Log('do_get_timestamp triggered.')
+    if len(args) > 0:
+        height = args[0]
+        Log('height:')
+        Log(height)
+        target_block = GetHeader(height)
+        # Log('target_block:')
+        # Log(target_block)
+        timestamp = target_block.Timestamp
+        Log('timestamp:')
+        Log(timestamp)
+        return timestamp
+    Notify('invalid argument length')
+    return False
+
+
+def do_current_merkle() -> bytearray:
+    Log('do_current_merkle triggered.')
+    current_height = GetHeight()
+    Log('current_height:')
+    Log(current_height)
+    header = GetHeader(current_height)
+    version = GetVersion(header)
+    Log('version:')
+    Log(version)
+    hash_val = GetHash(header)
+    Log('hash_val:')
+    Log(hash_val)
+    merkle = GetMerkleRoot(header)
+    Log('merkle:')
+    Log(merkle)
+    return merkle
+
+
+def do_get_merkle(args: list) -> bytearray:
+    Log('do_get_merkle triggered.')
+    if len(args) > 0:
+        height = args[0]
+        Log('height:')
+        Log(height)
+        header = GetHeader(height)
+        version = GetVersion(header)
+        Log('version:')
+        Log(version)
+        hash_val = GetHash(header)
+        Log('hash_val:')
+        Log(hash_val)
+        merkle = GetMerkleRoot(header)
+        Log('merkle:')
+        Log(merkle)
+        return merkle
+    Notify('invalid argument length')
+    return False
 
 
 # -- Account
