@@ -79,7 +79,10 @@ def Main(operation: str, args: list) -> bytearray:
         elif operation == 'my_address':     # Get invoker's wallet address in bytearray
             result = do_my_address()
             return result
-        elif operation == 'is_address':      # Check if invoker's address matches the specified address
+        elif operation == 'target_address': # Get the target address in bytearray
+            result = do_target_address()
+            return result
+        elif operation == 'is_address':     # Check if invoker's address matches the specified address
             result = do_is_address(args)
             return result
         elif operation == 'is_witness_address':      # Check if invoker's address matches the specified address
@@ -240,10 +243,18 @@ def do_height() -> int:
 
 def do_my_address() -> bytearray:
     Log('do_my_address triggered.')
-    sender_addr = get_my_address()
-    Log('sender_addr:')
-    Log(sender_addr)
-    return sender_addr
+    sender_address = get_my_address()
+    Log('sender_address:')
+    Log(sender_address)
+    return sender_address
+
+
+def do_target_address() -> bytearray:
+    Log('do_target_address triggered.')
+    receiver_address = get_target_address()
+    Log('receiver_address:')
+    Log(receiver_address)
+    return receiver_address
 
 
 def do_is_address(args: list) -> bool:
@@ -295,25 +306,28 @@ def get_fibonacci(n: int) -> int:
 
 
 def get_my_address() -> bytearray:
-    # Log('get_my_address triggered.')
+    Log('get_my_address triggered.')
     tx = GetScriptContainer()
-    # Log('tx:')
-    # Log(tx)
-    # TODO: tx None check
+    Log('tx:')
+    Log(tx)
     references = tx.References
-    # Log('references:')
-    # Log(references)
-    # TODO: references None and length check
-    # receiver_addr = GetExecutingScriptHash()
-    # Log('receiver_addr:')
-    # Log(receiver_addr)
+    Log('references:')
+    Log(references)
     reference = references[0]
-    # Log('reference:')
-    # Log(reference)
-    sender_addr = reference.ScriptHash
-    # Log('sender_addr:')
-    # Log(sender_addr)
-    return sender_addr
+    Log('reference:')
+    Log(reference)
+    sender_address = reference.ScriptHash
+    Log('sender_address:')
+    Log(sender_address)
+    return sender_address
+
+
+def get_target_address() -> bytearray:
+    Log('get_target_address triggered.')
+    receiver_address = GetExecutingScriptHash()
+    Log('receiver_address:')
+    Log(receiver_address)
+    return receiver_address
 
 
 def set_storage(context, key: str, value: bytearray) -> bool:

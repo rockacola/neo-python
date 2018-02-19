@@ -36,6 +36,7 @@ build ./demo/contracts/util-contract.py test 0710 05 True False get_storage ['cu
 
 ``` sh
 build ./demo/contracts/util-contract.py test 0710 05 True False my_address --attach-gas=0.001
+build ./demo/contracts/util-contract.py test 0710 05 True False target_address --attach-gas=0.001
 build ./demo/contracts/util-contract.py test 0710 05 True False is_address ['AK2nJJpJr6o664CWJKi1QRXjqeic2zRp8y'] --attach-gas=0.001
 build ./demo/contracts/util-contract.py test 0710 05 True False is_witness_address ['AK2nJJpJr6o664CWJKi1QRXjqeic2zRp8y']
 ```
