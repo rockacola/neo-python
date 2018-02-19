@@ -24,20 +24,28 @@ build ./demo/contracts/util-contract.py test 0710 05 True False neo_id
 
 ### Number
 
-
 ``` sh
-build ./demo/contracts/util-contract.py test 0710 05 True False char_count ['AK2nJJpJr6o664CWJKi1QRXjqeic2zRp8y']
+build ./demo/contracts/util-contract.py test 0710 05 True False add [7,8]
+build ./demo/contracts/util-contract.py test 0710 05 True False multiply [3,7]
+build ./demo/contracts/util-contract.py test 0710 05 True False square [6]
+build ./demo/contracts/util-contract.py test 0710 05 True False power [2,8]
+build ./demo/contracts/util-contract.py test 0710 05 True False fibonacci [7]
 ```
 
 ### String
 
-TBA
+``` sh
+build ./demo/contracts/util-contract.py test 0710 05 True False char_count ['AK2nJJpJr6o664CWJKi1QRXjqeic2zRp8y']
+build ./demo/contracts/util-contract.py test 0710 05 True False string_reverse ['live']
+```
 
 
 ### Array
 
-TBA
-
+``` sh
+build ./demo/contracts/util-contract.py test 0710 05 True False length ['one',2,False]
+build ./demo/contracts/util-contract.py test 0710 05 True False add_array [2,4,6]
+```
 
 ### Storage
 
@@ -50,8 +58,9 @@ build ./demo/contracts/util-contract.py test 0710 05 True False get_storage ['cu
 
 ### Block
 
-TBA
-
+``` sh
+build ./demo/contracts/util-contract.py test 0710 05 True False height
+```
 
 ### Account
 
