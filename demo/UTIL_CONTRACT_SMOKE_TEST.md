@@ -81,8 +81,9 @@ build ./demo/contracts/util-contract.py test 0710 05 True False is_witness_addre
 
 ## Against TestNet
 
+### General
+
 ``` sh
-testinvoke 8322cac3d30094c947615c944e9d3734b6e467bc version
-testinvoke 8322cac3d30094c947615c944e9d3734b6e467bc my_address [] --attach-gas=0.001
-testinvoke 8322cac3d30094c947615c944e9d3734b6e467bc is_address ['AK2nJJpJr6o664CWJKi1QRXjqeic2zRp8y'] --attach-gas=0.001
+testinvoke 2ed7cb2fb83f5ed9c30177129da82475fbb2ac8a version
+testinvoke 2ed7cb2fb83f5ed9c30177129da82475fbb2ac8a is_owner
 ```

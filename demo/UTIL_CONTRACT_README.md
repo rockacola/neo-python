@@ -4,6 +4,15 @@
 
 TBA
 
+
+### To Deploy
+
+* `import contract ./demo/contracts/util-contract.avm 0710 05 True False`
+
+### Contract Hashes on Testnet
+
+* Version 9: `2ed7cb2fb83f5ed9c30177129da82475fbb2ac8a`
+
 ---
 
 ## Development notes
