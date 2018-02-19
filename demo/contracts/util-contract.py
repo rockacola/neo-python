@@ -2,7 +2,7 @@ from boa.blockchain.vm.System.ExecutionEngine import GetScriptContainer, GetExec
 from boa.blockchain.vm.Neo.Transaction import *
 from boa.blockchain.vm.Neo.Runtime import Log, Notify, GetTrigger, CheckWitness
 from boa.blockchain.vm.Neo.Blockchain import GetHeight, GetHeader
-from boa.blockchain.vm.Neo.Header import GetMerkleRoot, GetTimestamp, GetHash, GetVersion, GetNextConsensus
+from boa.blockchain.vm.Neo.Header import GetMerkleRoot, GetTimestamp, GetHash, GetVersion, GetConsensusData, GetNextConsensus
 from boa.blockchain.vm.Neo.Action import RegisterAction
 from boa.blockchain.vm.Neo.TriggerType import Application, Verification
 from boa.blockchain.vm.Neo.Storage import GetContext, Get, Put, Delete
@@ -11,7 +11,7 @@ from boa.code.builtins import concat, list, range, take, substr
 
 
 # Global
-VERSION = 8
+VERSION = 9
 OWNER = b'\x96P\xac\xd6\xb7S,\xb4\xeaiU\xedK\x0f\xd3\xaa\xa9\xc9Q\x87'
 NEO_ASSET_ID = b'\x9b|\xff\xda\xa6t\xbe\xae\x0f\x93\x0e\xbe`\x85\xaf\x90\x93\xe5\xfeV\xb3J\\"\x0c\xcd\xcfn\xfc3o\xc5'
 GAS_ASSET_ID = b'\xe7-(iy\xeel\xb1\xb7\xe6]\xfd\xdf\xb2\xe3\x84\x10\x0b\x8d\x14\x8ewX\xdeB\xe4\x16\x8bqy,`'
@@ -93,11 +93,17 @@ def Main(operation: str, args: list) -> bytearray:
         elif operation == 'get_timestamp':      # Get timestamp of current block
             result = do_get_timestamp(args)
             return result
-        elif operation == 'current_merkle':
-            result = do_current_merkle()
-            return result
         elif operation == 'get_merkle':
             result = do_get_merkle(args)
+            return result
+        elif operation == 'get_block_hash':
+            result = do_get_block_hash(args)
+            return result
+        elif operation == 'get_consensus':
+            result = do_get_consensus(args)
+            return result
+        elif operation == 'get_next_consensus':
+            result = do_get_next_consensus(args)
             return result
         # Account
         elif operation == 'my_address':     # Get invoker's wallet address in bytearray
@@ -293,7 +299,7 @@ def do_current_timestamp() -> bytearray:
     # Log(current_block)
     timestamp = current_block.Timestamp
     Log('timestamp:')
-    Log(timestamp)
+    Log(timestamp)  # Example b'\xc1\xc7|Z'
     return timestamp
 
 
@@ -303,33 +309,13 @@ def do_get_timestamp(args: list) -> bytearray:
         height = args[0]
         Log('height:')
         Log(height)
-        target_block = GetHeader(height)
-        # Log('target_block:')
-        # Log(target_block)
-        timestamp = target_block.Timestamp
+        header = GetHeader(height)
+        timestamp = header.Timestamp
         Log('timestamp:')
         Log(timestamp)
         return timestamp
     Notify('invalid argument length')
     return False
-
-
-def do_current_merkle() -> bytearray:
-    Log('do_current_merkle triggered.')
-    current_height = GetHeight()
-    Log('current_height:')
-    Log(current_height)
-    header = GetHeader(current_height)
-    version = GetVersion(header)
-    Log('version:')
-    Log(version)
-    hash_val = GetHash(header)
-    Log('hash_val:')
-    Log(hash_val)
-    merkle = GetMerkleRoot(header)
-    Log('merkle:')
-    Log(merkle)
-    return merkle
 
 
 def do_get_merkle(args: list) -> bytearray:
@@ -342,13 +328,56 @@ def do_get_merkle(args: list) -> bytearray:
         version = GetVersion(header)
         Log('version:')
         Log(version)
-        hash_val = GetHash(header)
-        Log('hash_val:')
-        Log(hash_val)
         merkle = GetMerkleRoot(header)
         Log('merkle:')
         Log(merkle)
         return merkle
+    Notify('invalid argument length')
+    return False
+
+
+def do_get_block_hash(args: list) -> bytearray:
+    Log('do_get_block_hash triggered.')
+    if len(args) > 0:
+        height = args[0]
+        Log('height:')
+        Log(height)
+        header = GetHeader(height)
+        # version = GetVersion(header)
+        hash_val = GetHash(header)
+        Log('hash_val:')
+        Log(hash_val)
+        return hash_val
+    Notify('invalid argument length')
+    return False
+
+
+def do_get_consensus(args: list) -> bytearray:
+    Log('do_get_consensus triggered.')
+    if len(args) > 0:
+        height = args[0]
+        Log('height:')
+        Log(height)
+        header = GetHeader(height)
+        consensus = header.ConsensusData
+        Log('consensus:')
+        Log(consensus)
+        return consensus
+    Notify('invalid argument length')
+    return False
+
+
+def do_get_next_consensus(args: list) -> bytearray:
+    Log('do_get_next_consensus triggered.')
+    if len(args) > 0:
+        height = args[0]
+        Log('height:')
+        Log(height)
+        header = GetHeader(height)
+        next_consensus = header.NextConsensus
+        Log('next_consensus:')
+        Log(next_consensus)
+        return next_consensus
     Notify('invalid argument length')
     return False
 
