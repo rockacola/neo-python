@@ -70,6 +70,7 @@ build ./demo/contracts/projects/neo-alias.py test 0710 05 True False get_alias_s
 testinvoke 83d3ddd44f4c197152b827f3660b00a49fcb5d22 version
 testinvoke 83d3ddd44f4c197152b827f3660b00a49fcb5d22 is_owner
 testinvoke 83d3ddd44f4c197152b827f3660b00a49fcb5d22 count_all
+testinvoke 83d3ddd44f4c197152b827f3660b00a49fcb5d22 get_all_index [0]
 testinvoke 83d3ddd44f4c197152b827f3660b00a49fcb5d22 get_storage ['all_\x00']
 ```
 
