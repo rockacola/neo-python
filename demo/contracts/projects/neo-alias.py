@@ -9,7 +9,7 @@ from boa.code.builtins import concat, list, range
 
 
 # Global
-VERSION = 17
+VERSION = 18
 OWNER = b'\x96P\xac\xd6\xb7S,\xb4\xeaiU\xedK\x0f\xd3\xaa\xa9\xc9Q\x87'  # Script has for AVUfegS354LWRoBuCzuKjGCYkT3tnpFFTD
 
 
@@ -114,12 +114,13 @@ def do_set_alias(args: list) -> bool:
         invoker_address = args[0]
         target_address = args[1]
         new_alias = args[2]
-        is_match = CheckWitness(invoker_address)
+        # -- Ignore invoker validation for now
+        # is_match = CheckWitness(invoker_address)
         # Notify('Check is_match:')
         # Notify(is_match)
-        if is_match == False:  # Validate invoker
-            Notify('mismatch invoker address')
-            return False
+        # if is_match == False:  # Validate invoker
+        #     Notify('mismatch invoker address')
+        #     return False
         result = set_alias(context, invoker_address, target_address, new_alias)
         return result
     Notify('invalid argument length')
@@ -173,12 +174,13 @@ def do_vote_alias(args: list) -> int:
             Notify('invalid vote point provided')
             return False
         else:
-            is_match = CheckWitness(invoker_address)
+            # -- Ignore Invoker validation for now
+            # is_match = CheckWitness(invoker_address)
             # Notify('Check is_match:')
             # Notify(is_match)
-            if is_match == False:  # Validate invoker
-                Notify('mismatch invoker address')
-                return False
+            # if is_match == False:  # Validate invoker
+            #     Notify('mismatch invoker address')
+            #     return False
             result = vote_alias(context, invoker_address, target_address, index, point)
             return result
     Notify('invalid argument length')
