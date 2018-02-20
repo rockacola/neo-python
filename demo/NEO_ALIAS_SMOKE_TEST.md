@@ -67,10 +67,10 @@ build ./demo/contracts/projects/neo-alias.py test 0710 05 True False get_alias_s
 ### Global attributes
 
 ``` sh
-testinvoke 8a092d91a822192b20e91722dc3dea28dfdb5cbd version
-testinvoke 8a092d91a822192b20e91722dc3dea28dfdb5cbd is_owner
-testinvoke 8a092d91a822192b20e91722dc3dea28dfdb5cbd count_all
-testinvoke 8a092d91a822192b20e91722dc3dea28dfdb5cbd get_storage ['all_\x00']
+testinvoke 83d3ddd44f4c197152b827f3660b00a49fcb5d22 version
+testinvoke 83d3ddd44f4c197152b827f3660b00a49fcb5d22 is_owner
+testinvoke 83d3ddd44f4c197152b827f3660b00a49fcb5d22 count_all
+testinvoke 83d3ddd44f4c197152b827f3660b00a49fcb5d22 get_storage ['all_\x00']
 ```
 
 ### Alias assignments
@@ -79,39 +79,39 @@ testinvoke 8a092d91a822192b20e91722dc3dea28dfdb5cbd get_storage ['all_\x00']
 * UTF-8 characters seems fine
 
 ``` sh
-testinvoke 8a092d91a822192b20e91722dc3dea28dfdb5cbd count_alias ['AYUhHYViEoXEWeLQsXU9y1taps4nvjAHiy']
-testinvoke 8a092d91a822192b20e91722dc3dea28dfdb5cbd get_alias ['AYUhHYViEoXEWeLQsXU9y1taps4nvjAHiy',0]
-testinvoke 8a092d91a822192b20e91722dc3dea28dfdb5cbd set_alias ['AVUfegS354LWRoBuCzuKjGCYkT3tnpFFTD','AYUhHYViEoXEWeLQsXU9y1taps4nvjAHiy','ayu']
+testinvoke 83d3ddd44f4c197152b827f3660b00a49fcb5d22 count_alias ['AYUhHYViEoXEWeLQsXU9y1taps4nvjAHiy']
+testinvoke 83d3ddd44f4c197152b827f3660b00a49fcb5d22 get_alias ['AYUhHYViEoXEWeLQsXU9y1taps4nvjAHiy',0]
+testinvoke 83d3ddd44f4c197152b827f3660b00a49fcb5d22 set_alias ['AVUfegS354LWRoBuCzuKjGCYkT3tnpFFTD','AYUhHYViEoXEWeLQsXU9y1taps4nvjAHiy','ayu']
 
-testinvoke 8a092d91a822192b20e91722dc3dea28dfdb5cbd count_alias ['AZLvNpvTmDvEL4Qc5AH64vniSJe11LHzWU']
-testinvoke 8a092d91a822192b20e91722dc3dea28dfdb5cbd get_alias ['AZLvNpvTmDvEL4Qc5AH64vniSJe11LHzWU',0]
-testinvoke 8a092d91a822192b20e91722dc3dea28dfdb5cbd set_alias ['AVUfegS354LWRoBuCzuKjGCYkT3tnpFFTD','AZLvNpvTmDvEL4Qc5AH64vniSJe11LHzWU','azrel.adams']
-testinvoke 8a092d91a822192b20e91722dc3dea28dfdb5cbd set_alias ['AVUfegS354LWRoBuCzuKjGCYkT3tnpFFTD','AZLvNpvTmDvEL4Qc5AH64vniSJe11LHzWU','azrel.adams签名']
+testinvoke 83d3ddd44f4c197152b827f3660b00a49fcb5d22 count_alias ['AZLvNpvTmDvEL4Qc5AH64vniSJe11LHzWU']
+testinvoke 83d3ddd44f4c197152b827f3660b00a49fcb5d22 get_alias ['AZLvNpvTmDvEL4Qc5AH64vniSJe11LHzWU',0]
+testinvoke 83d3ddd44f4c197152b827f3660b00a49fcb5d22 set_alias ['AVUfegS354LWRoBuCzuKjGCYkT3tnpFFTD','AZLvNpvTmDvEL4Qc5AH64vniSJe11LHzWU','azrel.adams']
+testinvoke 83d3ddd44f4c197152b827f3660b00a49fcb5d22 set_alias ['AVUfegS354LWRoBuCzuKjGCYkT3tnpFFTD','AZLvNpvTmDvEL4Qc5AH64vniSJe11LHzWU','azrel.adams签名']
 ```
 
 ### Alias score check
 
 ``` sh
-testinvoke 8a092d91a822192b20e91722dc3dea28dfdb5cbd get_alias_score ['AYUhHYViEoXEWeLQsXU9y1taps4nvjAHiy',0]
-testinvoke 8a092d91a822192b20e91722dc3dea28dfdb5cbd get_alias_score ['AZLvNpvTmDvEL4Qc5AH64vniSJe11LHzWU',0]
+testinvoke 83d3ddd44f4c197152b827f3660b00a49fcb5d22 get_alias_score ['AYUhHYViEoXEWeLQsXU9y1taps4nvjAHiy',0]
+testinvoke 83d3ddd44f4c197152b827f3660b00a49fcb5d22 get_alias_score ['AZLvNpvTmDvEL4Qc5AH64vniSJe11LHzWU',0]
 ```
 
 ### Cast votes
 
 ```sh
-testinvoke 8a092d91a822192b20e91722dc3dea28dfdb5cbd vote_alias ['AVUfegS354LWRoBuCzuKjGCYkT3tnpFFTD','AYUhHYViEoXEWeLQsXU9y1taps4nvjAHiy',0,1]
-testinvoke 8a092d91a822192b20e91722dc3dea28dfdb5cbd get_alias_score ['AYUhHYViEoXEWeLQsXU9y1taps4nvjAHiy',0]
+testinvoke 83d3ddd44f4c197152b827f3660b00a49fcb5d22 vote_alias ['AVUfegS354LWRoBuCzuKjGCYkT3tnpFFTD','AYUhHYViEoXEWeLQsXU9y1taps4nvjAHiy',0,1]
+testinvoke 83d3ddd44f4c197152b827f3660b00a49fcb5d22 get_alias_score ['AYUhHYViEoXEWeLQsXU9y1taps4nvjAHiy',0]
 ```
 
 Cast vote with a mismatch invoker address
 
 ```sh
-testinvoke 8a092d91a822192b20e91722dc3dea28dfdb5cbd vote_alias ['BAD','AYUhHYViEoXEWeLQsXU9y1taps4nvjAHiy',0,1]
+testinvoke 83d3ddd44f4c197152b827f3660b00a49fcb5d22 vote_alias ['BAD','AYUhHYViEoXEWeLQsXU9y1taps4nvjAHiy',0,1]
 ```
 
 Switch to `neo-privnet.wallet` for casting vote
 
 ```sh
-testinvoke 8a092d91a822192b20e91722dc3dea28dfdb5cbd vote_alias ['AK2nJJpJr6o664CWJKi1QRXjqeic2zRp8y','AYUhHYViEoXEWeLQsXU9y1taps4nvjAHiy',0,1]
-testinvoke 8a092d91a822192b20e91722dc3dea28dfdb5cbd get_alias_score ['AYUhHYViEoXEWeLQsXU9y1taps4nvjAHiy',0]
+testinvoke 83d3ddd44f4c197152b827f3660b00a49fcb5d22 vote_alias ['AK2nJJpJr6o664CWJKi1QRXjqeic2zRp8y','AYUhHYViEoXEWeLQsXU9y1taps4nvjAHiy',0,1]
+testinvoke 83d3ddd44f4c197152b827f3660b00a49fcb5d22 get_alias_score ['AYUhHYViEoXEWeLQsXU9y1taps4nvjAHiy',0]
 ```
