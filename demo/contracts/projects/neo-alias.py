@@ -21,8 +21,8 @@ def Main(operation: str, args: list) -> bytearray:
 
     if trigger == Verification():
         is_owner = CheckWitness(OWNER)
-        Log('Check is_owner:')
-        Log(is_owner)
+        Notify('Check is_owner:')
+        Notify(is_owner)
         if is_owner:
             return True
         return False
@@ -74,10 +74,10 @@ def Main(operation: str, args: list) -> bytearray:
             result = get_invoker_address()
             return result
 
-        Log('unknown operation')
+        Notify('unknown operation')
         return False
 
-    Log('invalid request')
+    Notify('invalid request')
     return False
 
 
@@ -86,8 +86,8 @@ def Main(operation: str, args: list) -> bytearray:
 
 def do_version() -> int:
     version = VERSION + 0
-    Log('version:')
-    Log(version)
+    Notify('version:')
+    Notify(version)
     return version
 
 
@@ -96,9 +96,9 @@ def do_is_owner() -> bool:
 
 
 def do_count_alias(args: list) -> int:
-    # Log('do_count_alias triggered.')
-    # Log('args:')
-    # Log(args)
+    # Notify('do_count_alias triggered.')
+    # Notify('args:')
+    # Notify(args)
     if len(args) > 0:
         context = GetContext()
         address = args[0]
@@ -115,8 +115,8 @@ def do_set_alias(args: list) -> bool:
         target_address = args[1]
         new_alias = args[2]
         is_match = CheckWitness(invoker_address)
-        # Log('Check is_match:')
-        # Log(is_match)
+        # Notify('Check is_match:')
+        # Notify(is_match)
         if is_match == False:  # Validate invoker
             Notify('mismatch invoker address')
             return False
@@ -174,8 +174,8 @@ def do_vote_alias(args: list) -> int:
             return False
         else:
             is_match = CheckWitness(invoker_address)
-            # Log('Check is_match:')
-            # Log(is_match)
+            # Notify('Check is_match:')
+            # Notify(is_match)
             if is_match == False:  # Validate invoker
                 Notify('mismatch invoker address')
                 return False
@@ -193,7 +193,7 @@ def do_count_all_aliases() -> number:
 
 
 def do_get_all_index(args: list) -> bytearray:
-    Log('do_get_all_index triggered.')
+    Notify('do_get_all_index triggered.')
     if len(args) > 0:
         context = GetContext()
         index = args[0]
@@ -211,7 +211,7 @@ def do_get_all_index(args: list) -> bytearray:
 
 
 def do_get_storage(args: list) -> bytearray:
-    Log('do_get_storage triggered.')
+    Notify('do_get_storage triggered.')
     is_owner = CheckWitness(OWNER)
     if is_owner == False:
         Notify('permission denied')
@@ -219,18 +219,18 @@ def do_get_storage(args: list) -> bytearray:
     if len(args) > 0:
         context = GetContext()
         key = args[0]
-        Log('key:')
-        Log(key)
+        Notify('key:')
+        Notify(key)
         value = Get(context, key)
-        Log('value:')
-        Log(value)
+        Notify('value:')
+        Notify(value)
         return value
     Notify('invalid argument length')
     return False
 
 
 def do_set_storage(args: list) -> bytearray:
-    Log('do_set_storage triggered.')
+    Notify('do_set_storage triggered.')
     is_owner = CheckWitness(OWNER)
     if is_owner == False:
         Notify('permission denied')
@@ -238,11 +238,11 @@ def do_set_storage(args: list) -> bytearray:
     if len(args) > 1:
         context = GetContext()
         key = args[0]
-        Log('key:')
-        Log(key)
+        Notify('key:')
+        Notify(key)
         value = args[1]
-        Log('value:')
-        Log(value)
+        Notify('value:')
+        Notify(value)
         Put(context, key, value)
         return True
     Notify('invalid argument length')
@@ -254,18 +254,18 @@ def do_set_storage(args: list) -> bytearray:
 
 def get_alias_count(context, address: str) -> int:
     # TODO: validate address
-    Log('get_alias_count triggered.')
+    Notify('get_alias_count triggered.')
     key = prepare_count_key(address)
-    Log('key:')
-    Log(key)
+    Notify('key:')
+    Notify(key)
     value = Get(context, key)
     if value == None:  # Must use ==. use 'is' provides false negative
-        Log('oh, value detected to be None.')
+        Notify('oh, value detected to be None.')
         value = 0
     else:
         value = value + 0  # trick value to always be an integer # NOTE: is this even a real hack?
-    Log('value:')
-    Log(value)
+    Notify('value:')
+    Notify(value)
     return value
 
 
@@ -284,23 +284,23 @@ def increment_alias_count(context, address: str, existing_count: int) -> bool:
 def set_alias(context, invoker_address: str, target_address: str, new_alias: str) -> bool:
     # TODO: get invokers address
     # TODO: verify if this is the first time invoker assigning alias to target address
-    Log('set_alias triggered.')
+    Notify('set_alias triggered.')
     index = get_alias_count(context, target_address)
-    Log('index:')
-    Log(index)
+    Notify('index:')
+    Notify(index)
     key = prepare_alias_key(target_address, index)
-    Log('key:')
-    Log(key)
+    Notify('key:')
+    Notify(key)
     Put(context, key, new_alias)
     # Update counter of this address
     new_count = index + 1
-    Log('new_count:')
-    Log(new_count)
+    Notify('new_count:')
+    Notify(new_count)
     set_alias_count(context, target_address, new_count)
     # Keep track of all records
     all_index = get_all_count(context)
-    Log('all_index:')
-    Log(all_index)
+    Notify('all_index:')
+    Notify(all_index)
     set_all_alias(context, all_index, key)  # Store alias key as value for all records
     increment_all_count(context, all_index)
     # log invoker's address assignment by cast default 1 point vote
@@ -311,8 +311,8 @@ def set_alias(context, invoker_address: str, target_address: str, new_alias: str
 def get_alias(context, address: str, index: int) -> str:
     key = prepare_alias_key(address, index)
     alias = Get(context, key)
-    Log('alias:')
-    Log(alias)
+    Notify('alias:')
+    Notify(alias)
     return alias
 
 
@@ -329,20 +329,20 @@ def get_aliases(context, address: str) -> list:
 
 
 def vote_alias(context, invoker_address: str, target_address: str, index: int, point: int) -> int:
-    Log('vote_alias triggered.')
+    Notify('vote_alias triggered.')
     # check if already voted previously
     has_voted = check_has_voted(context, invoker_address, target_address, index)
-    Log('has_voted:')
-    Log(has_voted)
+    Notify('has_voted:')
+    Notify(has_voted)
     if has_voted == False:
         # Get stored score for this alias
         existing_score = get_alias_score(context, target_address, index)
-        Log('existing_score:')
-        Log(existing_score)
+        Notify('existing_score:')
+        Notify(existing_score)
         # Update value
         new_score = existing_score + point
-        Log('new_score:')
-        Log(new_score)
+        Notify('new_score:')
+        Notify(new_score)
         # Store new score
         set_alias_score(context, target_address, index, new_score)
         # Set vote log
@@ -354,11 +354,11 @@ def vote_alias(context, invoker_address: str, target_address: str, index: int, p
 
 
 def get_alias_score(context, address: str, index: int) -> int:
-    Log('get_alias_score triggered.')
+    Notify('get_alias_score triggered.')
     key = prepare_score_key(address, index)
     value = Get(context, key)
     if value == None:
-        Log('existing score value detected to be None.')
+        Notify('existing score value detected to be None.')
         value = 0
     return value
 
@@ -386,11 +386,11 @@ def increment_all_count(context, existing_count: int) -> bool:
 
 
 def check_has_voted(context, invoker_address: str, target_address: str, index: int) -> bool:
-    Log('check_has_voted triggered')
+    Notify('check_has_voted triggered')
     key = prepare_log_vote_key(invoker_address, target_address, index)
     value = Get(context, key)
-    Log('value:')
-    Log(value)
+    Notify('value:')
+    Notify(value)
     if value == None:
         return False
     else:
@@ -438,14 +438,14 @@ def prepare_log_vote_key(invoker_address: str, target_address: str, index: int) 
 
 def get_invoker_address() -> str:
     '''
-    I don't think you can Log() tx, references nor reference.
+    I don't think you can Notify() tx, references nor reference.
     Also you cannot really have validators in place, things like "if tx is not None" error'ed out.
     '''
-    Log('get_invoker_address triggered.')
+    Notify('get_invoker_address triggered.')
     tx = GetScriptContainer()
     references = tx.References
     reference = references[0]
     sender_addr = reference.ScriptHash
-    Log('sender_addr:')
-    Log(sender_addr)
+    Notify('sender_addr:')
+    Notify(sender_addr)
     return sender_addr
