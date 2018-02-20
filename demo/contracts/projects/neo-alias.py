@@ -59,6 +59,9 @@ def Main(operation: str, args: list) -> bytearray:
         elif operation == 'count_all':      # Count total alias assigned
             result = do_count_all_aliases()
             return result
+        elif operation == 'get_all_index':  # Get the alias key of specified all index
+            result = do_get_all_index(args)
+            return result
 
         # Admin Utilities
         elif operation == 'get_storage':
@@ -187,6 +190,24 @@ def do_count_all_aliases() -> number:
     address = 'all'
     result = get_alias_count(context, address)
     return result
+
+
+def do_get_all_index(args: list) -> bytearray:
+    Log('do_get_all_index triggered.')
+    if len(args) > 0:
+        context = GetContext()
+        index = args[0]
+        Notify('index:')
+        Notify(index)
+        key = prepare_alias_key('all', index)
+        Notify('key:')
+        Notify(key)
+        result = Get(context, key)
+        Notify('result:')
+        Notify(result)
+        return result
+    Notify('invalid argument length')
+    return False
 
 
 def do_get_storage(args: list) -> bytearray:
