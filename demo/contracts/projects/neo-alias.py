@@ -9,7 +9,7 @@ from boa.code.builtins import concat, list, range
 
 
 # Global
-VERSION = 18
+VERSION = 19
 OWNER = b'\x96P\xac\xd6\xb7S,\xb4\xeaiU\xedK\x0f\xd3\xaa\xa9\xc9Q\x87'  # Script has for AVUfegS354LWRoBuCzuKjGCYkT3tnpFFTD
 
 
@@ -414,23 +414,26 @@ def prepare_count_key(address: str) -> str:
 
 def prepare_alias_key(address: str, index: int) -> str:
     # Format: {address}_{index}
+    indexText = int2str(index)
     key = concat(address, '_')
-    key = concat(key, index)
+    key = concat(key, indexText)
     return key
 
 
 def prepare_score_key(address: str, index: int) -> str:
     # Format: {address}_{index}_score
+    indexText = int2str(index)
     key = concat(address, '_')
-    key = concat(key, index)
+    key = concat(key, indexText)
     key = concat(key, '_score')
     return key
 
 
 def prepare_log_vote_key(invoker_address: str, target_address: str, index: int) -> str:
     # Format: {target_address}_{alias_index}_{invoker_address}
+    indexText = int2str(index)
     key = concat(target_address, '_')
-    key = concat(key, index)
+    key = concat(key, indexText)
     key = concat(key, '_')
     key = concat(key, invoker_address)
     return key
@@ -449,3 +452,19 @@ def get_invoker_address() -> str:
     Notify('sender_addr:')
     Notify(sender_addr)
     return sender_addr
+
+
+def int2str(num):
+    digits = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
+    result = ''
+    firstRun = True
+    while num > 0:
+        remainder = num % 10
+        num = num / 10
+        digit = digits[remainder]
+        if firstRun:
+            result = digit
+            firstRun = False
+        else:
+            result = concat(digit, result)
+    return result
